@@ -4,7 +4,6 @@ import asyncio
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 import discord
 from discord.ext import commands
-import traceback
 from util import Util
 from mongo import Mongo
 
