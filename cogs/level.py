@@ -6,6 +6,7 @@ import datetime as dt
 import discord
 from discord.ext import commands
 from mongo import Mongo
+from pymongo import ReturnDocument
 
 
 class Level(commands.Cog, name='Level'):
@@ -46,9 +47,9 @@ class Level(commands.Cog, name='Level'):
     async def update_experience(self, guild_id, user_id, amount: int = None):
         self.server_db = self.db['server'][guild_id]
         user = self.server_db.find_one_and_update({'_id': user_id}, {'$inc': {'exp': amount or random.randint(100, 150)}},
-                                                  returnNewDocument=True)
+                                                  return_document=ReturnDocument.AFTER)
         user = self.server_db.find_one_and_update({'_id': user_id}, {'$set': {'level': self.update_level(user['exp'])}},
-                                                  returnNewDocument=True)
+                                                  return_document=ReturnDocument.AFTER)
         return user['level'], user['exp']
 
     @commands.Cog.listener()

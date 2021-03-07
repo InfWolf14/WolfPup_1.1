@@ -33,15 +33,16 @@ class Thank(commands.Cog):
         if os.path.isfile(f'config/{ctx.guild.id}/config.json'):
             with open(f'config/{ctx.guild.id}/config.json', 'r') as f:
                 config = json.load(f)
-            if str(ctx.channel.id) not in config['bot_channels']:
+            if str(ctx.channel.id) not in config['bot_channels']: # <- Change 'not in' to 'in' for release
                 await ctx.message.delete()
-                error = await ctx.send(embed=discord.Embed(title='This command is only available in bot channels!'))
+                error = await ctx.send(embed=discord.Embed(title='This command is __not__ available in bot channels!'))
                 await asyncio.sleep(5)
                 await error.delete()
+                return
         if not member.bot:
-            if ctx.author == member:
+            if ctx.author == None: #member:
                 new_embed = discord.Embed(
-                    title='\U0001f441 You tried to thank yourself, shame on you \U0001f441')
+                    title='\U0001f441\U0001f441 You tried to thank yourself, shame on you \U0001f441\U0001f441')
                 shame_gifs = ['https://media.giphy.com/media/NSTS6t7qKTiDu/giphy.gif',
                               'https://media.giphy.com/media/vX9WcCiWwUF7G/giphy.gif',
                               'https://media.giphy.com/media/eP1fobjusSbu/giphy.gif',
