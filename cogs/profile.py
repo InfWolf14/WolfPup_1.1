@@ -39,6 +39,14 @@ class Profile(commands.Cog):
         """Add your usernames for your game system"""
         username = ' '.join(name)
         self.server_db = self.db['server'][str(ctx.guild.id)]
+        if os.path.isfile(f'config/{ctx.guild.id}/config.json'):
+            with open(f'config/{ctx.guild.id}/config.json', 'r') as f:
+                config = json.load(f)
+            if str(ctx.channel.id) not in config['bot_channels']:
+                await ctx.message.delete()
+                error = await ctx.send(embed=discord.Embed(title='This command is only available in bot channels!'))
+                await asyncio.sleep(5)
+                await error.delete()
         for platform in self.sys_aliases:
             if system.upper() in self.sys_aliases[platform]:
                 self.server_db.find_one_and_update({'_id': str(ctx.author.id)},
@@ -54,6 +62,14 @@ class Profile(commands.Cog):
     async def get(self, ctx, system: str, member: discord.Member = None):
         """Get a users usernames."""
         self.server_db = self.db['server'][str(ctx.guild.id)]
+        if os.path.isfile(f'config/{ctx.guild.id}/config.json'):
+            with open(f'config/{ctx.guild.id}/config.json', 'r') as f:
+                config = json.load(f)
+            if str(ctx.channel.id) not in config['bot_channels']:
+                await ctx.message.delete()
+                error = await ctx.send(embed=discord.Embed(title='This command is only available in bot channels!'))
+                await asyncio.sleep(5)
+                await error.delete()
         if member is None:
             member = ctx.author
         for platform in self.sys_aliases:
@@ -95,6 +111,14 @@ class Profile(commands.Cog):
     async def delete(self, ctx, system):
         """Delete a username"""
         self.server_db = self.db['server'][str(ctx.guild.id)]
+        if os.path.isfile(f'config/{ctx.guild.id}/config.json'):
+            with open(f'config/{ctx.guild.id}/config.json', 'r') as f:
+                config = json.load(f)
+            if str(ctx.channel.id) not in config['bot_channels']:
+                await ctx.message.delete()
+                error = await ctx.send(embed=discord.Embed(title='This command is only available in bot channels!'))
+                await asyncio.sleep(5)
+                await error.delete()
         for platform in self.sys_aliases:
             if system.upper() in self.sys_aliases[platform]:
                 self.server_db.find_one_and_update({'_id': str(ctx.author.id)},
@@ -116,6 +140,14 @@ class Profile(commands.Cog):
         """Sets the custom wanted text on your profile card. """
         self.server_db = self.db['server'][str(ctx.guild.id)]
         wanted = ' '.join(text)
+        if os.path.isfile(f'config/{ctx.guild.id}/config.json'):
+            with open(f'config/{ctx.guild.id}/config.json', 'r') as f:
+                config = json.load(f)
+            if str(ctx.channel.id) not in config['bot_channels']:
+                await ctx.message.delete()
+                error = await ctx.send(embed=discord.Embed(title='This command is only available in bot channels!'))
+                await asyncio.sleep(5)
+                await error.delete()
         if len(wanted) != 0:
             self.server_db.find_one_and_update({'_id': str(ctx.author.id)}, {'$set': {f'profile.wanted_text': wanted}})
             await ctx.send(embed=discord.Embed(title='Successfully changed Wanted Text:',

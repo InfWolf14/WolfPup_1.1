@@ -40,7 +40,7 @@ class Level(commands.Cog, name='Level'):
                                                description=f'[LVL] **{user_level}**   [EXP] **{user_exp}**'))
 
     @staticmethod
-    async def update_level(xp):
+    def update_level(xp):
         return floor(((sqrt(40 + xp)) / 110) + 1)
 
     async def update_experience(self, guild_id, user_id, amount: int = None):
@@ -52,7 +52,7 @@ class Level(commands.Cog, name='Level'):
                 user_exp += amount
             else:
                 user_exp += random.randint(100, 150)
-            user_level = await self.update_level(user_exp)
+            user_level = self.update_level(user_exp)
             self.server_db.update_one({'_id': user_id}, {'$set': {'level': user_level}})
             self.server_db.update_one({'_id': user_id}, {'$set': {'exp': user_exp}})
             return user_level, user_exp
@@ -62,6 +62,8 @@ class Level(commands.Cog, name='Level'):
         if os.path.isfile(f'config/{message.guild.id}/config.json'):
             with open(f'config/{message.guild.id}/config.json', 'r') as f:
                 config = json.load(f)
+            if str(message.channel.id) in config['bot_channels']:
+                return
         if not message.author.bot:
             self.server_db = self.db['server'][str(message.guild.id)]
             user = self.server_db.find({'_id': str(message.author.id)})
