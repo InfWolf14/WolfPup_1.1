@@ -4,6 +4,7 @@ import asyncio
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 import discord
 from discord.ext import commands
+import traceback
 from util import Util
 from mongo import Mongo
 
@@ -18,7 +19,7 @@ def get_prefix(bot, message):
     return commands.when_mentioned_or(*prefixes)(bot, message)
 
 
-initial_cogs = ['util', 'cogs.level', 'cogs.profile']
+initial_cogs = ['util', 'cogs.level', 'cogs.profile', 'cogs.thank']
 intents = discord.Intents.default()
 intents.members = True
 bot = commands.Bot(command_prefix=get_prefix, description='A bot designed for GoldxGuns', intents=intents)
@@ -55,7 +56,7 @@ async def on_member_leave(member):
     with open(f'config/{str(member.guild.id)}/config.json', 'r') as f:
         config = json.load(f)
     config_channel = bot.get_channel(int(config['config_channel']))
-    Mongo.init_db(Mongo())['server'][str(member.guild.id)].find_one_and_delete({'_id': str(member.id)})
+    Mongo.init_db(Mongo(Mongo(bot)))['server'][str(member.guild.id)].find_one_and_delete({'_id': str(member.id)})
     config_channel.send(embed=discord.Embed(title=f'{member.displayname} left'))
 
 @bot.event
@@ -65,13 +66,17 @@ async def on_command_error(ctx, error):
     except discord.errors.NotFound:
         pass
     if isinstance(error, commands.MissingRequiredArgument):
-        error = await ctx.send(embed=discord.Embed(title='Error: Command missing arguments!'))
+        error = await ctx.send(embed=discord.Embed(title='**[Error]** : Command missing arguments!'))
     elif isinstance(error, commands.MissingPermissions):
-        error = await ctx.send(embed=discord.Embed(title='Error: You are missing required permissions!'))
+        error = await ctx.send(embed=discord.Embed(title='**[Error]** : You are missing required permissions!'))
     elif isinstance(error, commands.CommandNotFound):
-        error = await ctx.send(embed=discord.Embed(title='Error: Command not found!'))
+        error = await ctx.send(embed=discord.Embed(title='**[Error]** : Command not found!'))
     else:
-        error = await ctx.send(embed=discord.Embed(title='Error: An unspecified error has occured!'))
+        new_embed = discord.Embed(title=f'**[Error]** : {type(error).__name__}',
+                                           description=f'{error.__cause__}')
+        new_embed.set_footer(text='Please contact an administrator')
+        await ctx.send(embed=new_embed)
+        return
     await asyncio.sleep(5)
     await error.delete()
 
