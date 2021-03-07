@@ -6,6 +6,7 @@ from discord.ext import commands
 from mongo import Mongo
 from cogs.level import Level
 from cogs.profile import Profile
+from cogs.thank import Thank
 
 
 class Util(commands.Cog, name='Utility'):
@@ -67,6 +68,8 @@ class Util(commands.Cog, name='Utility'):
         await Level.build_level(Level(self.bot), ctx, member)
         await pending.edit(embed=discord.Embed(title='Rebuilding Profiles...'))
         await Profile.build_profile(Profile(self.bot), ctx, member)
+        await pending.edit(embed=discord.Embed(title='Rebuilding Thanks...'))
+        await Thank.build_thank(Thank(self.bot), ctx, member)
         if member is None:
             await pending.edit(embed=discord.Embed(title='Server Rebuild Complete',
                                                    description=f'Server ID: {str(ctx.guild.id)}'))
