@@ -53,10 +53,10 @@ class Thank(commands.Cog):
                 return
             self.server_db.find_one_and_update({'_id': str(ctx.author.id)}, {'$inc': {'thanks.thanks_given': 1,
                                                                                                 'thanks.total_given': 1}})
-            await Level.add_experience(Level(self.bot), ctx, ctx.author, random.randint(450, 550))
+            await Level.update_experience(Level(self.bot), str(ctx.guild.id), str(ctx.author.id), random.randint(450, 550))
             self.server_db.find_one_and_update({'_id': str(member.id)}, {'$inc': {'thanks.thanks_recieved': 1,
                                                                                             'thanks.total_recieved': 1}})
-            await Level.add_experience(Level(self.bot), ctx, member, random.randint(700, 800))
+            await Level.update_experience(Level(self.bot), str(ctx.guild.id), str(member.id), random.randint(450, 550))
             await ctx.channel.send(embed=discord.Embed(title=f'\U0001f49d {ctx.author.display_name}'
                                                              f' has thanked {member.display_name} \U0001f49d',
                                                        color=discord.Colour.gold()))
