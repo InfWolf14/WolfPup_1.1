@@ -60,7 +60,10 @@ async def on_member_leave(member):
 
 @bot.event
 async def on_command_error(ctx, error):
-    await ctx.message.delete()
+    try:
+        await ctx.message.delete()
+    except discord.errors.NotFound:
+        pass
     if isinstance(error, commands.MissingRequiredArgument):
         error = await ctx.send(embed=discord.Embed(title='Error: Command missing arguments!'))
     elif isinstance(error, commands.MissingPermissions):
