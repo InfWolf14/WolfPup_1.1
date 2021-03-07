@@ -45,17 +45,11 @@ class Level(commands.Cog, name='Level'):
 
     async def update_experience(self, guild_id, user_id, amount: int = None):
         self.server_db = self.db['server'][guild_id]
-        user = self.server_db.find({'_id': user_id})
-        for _, user_data in enumerate(user):
-            user_exp = user_data['exp']
-            if amount:
-                user_exp += amount
-            else:
-                user_exp += random.randint(100, 150)
-            user_level = self.update_level(user_exp)
-            self.server_db.update_one({'_id': user_id}, {'$set': {'level': user_level}})
-            self.server_db.update_one({'_id': user_id}, {'$set': {'exp': user_exp}})
-            return user_level, user_exp
+        user = self.server_db.find_one_and_update({'_id': user_id}, {'$inc': {'exp': amount or random.randint(100, 150)}},
+                                                  returnNewDocument=True)
+        user = self.server_db.find_one_and_update({'_id': user_id}, {'$set': {'level': self.update_level(user['exp'])}},
+                                                  returnNewDocument=True)
+        return user['level'], user['exp']
 
     @commands.Cog.listener()
     async def on_message(self, message):
@@ -66,14 +60,13 @@ class Level(commands.Cog, name='Level'):
                 return
         if not message.author.bot:
             self.server_db = self.db['server'][str(message.guild.id)]
-            user = self.server_db.find({'_id': str(message.author.id)})
-            for _, user_data in enumerate(user):
-                try:
-                    if (user_data['timestamp'] + dt.timedelta(seconds=3)) <= dt.datetime.utcnow():
-                        self.server_db.update_one({'_id': str(message.author.id)}, {'$set': {'timestamp': dt.datetime.utcnow()}})
-                        await self.update_experience(str(message.guild.id), str(message.author.id))
-                except KeyError:
-                    pass
+            user = self.server_db.find_one({'_id': str(message.author.id)})
+            try:
+                if (user['timestamp'] + dt.timedelta(seconds=45)) <= dt.datetime.utcnow():
+                    self.server_db.update_one({'_id': str(message.author.id)}, {'$set': {'timestamp': dt.datetime.utcnow()}})
+                    await self.update_experience(str(message.guild.id), str(message.author.id))
+            except KeyError:
+                pass
 
 
 def setup(bot):

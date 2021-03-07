@@ -30,15 +30,35 @@ class Thank(commands.Cog):
     @commands.command(name='thank', aliases=['thanks'])
     async def thank(self, ctx, member: discord.Member):
         self.server_db = self.db['server'][str(ctx.guild.id)]
+        if os.path.isfile(f'config/{ctx.guild.id}/config.json'):
+            with open(f'config/{ctx.guild.id}/config.json', 'r') as f:
+                config = json.load(f)
+            if str(ctx.channel.id) not in config['bot_channels']:
+                await ctx.message.delete()
+                error = await ctx.send(embed=discord.Embed(title='This command is only available in bot channels!'))
+                await asyncio.sleep(5)
+                await error.delete()
         if not member.bot:
-            thanker = self.server_db.find_one_and_update({'_id': str(ctx.author.id)}, {'$inc': {'thanks.thanks_given': 1,
+            if ctx.author == member:
+                new_embed = discord.Embed(
+                    title='\U0001f441 You tried to thank yourself, shame on you \U0001f441')
+                shame_gifs = ['https://media.giphy.com/media/NSTS6t7qKTiDu/giphy.gif',
+                              'https://media.giphy.com/media/vX9WcCiWwUF7G/giphy.gif',
+                              'https://media.giphy.com/media/eP1fobjusSbu/giphy.gif',
+                              'https://media.giphy.com/media/Db3OfoegpwajK/giphy.gif',
+                              'https://media.giphy.com/media/8UGoOaR1lA1uaAN892/giphy.gif']
+                new_embed.set_image(url=random.choice(shame_gifs))
+                await ctx.send(embed=new_embed)
+                return
+            self.server_db.find_one_and_update({'_id': str(ctx.author.id)}, {'$inc': {'thanks.thanks_given': 1,
                                                                                                 'thanks.total_given': 1}})
-            thankee = self.server_db.find_one_and_update({'_id': str(member.id)}, {'$inc': {'thanks.thanks_recieved': 1,
+            await Level.add_experience(Level(self.bot), ctx, ctx.author, random.randint(450, 550))
+            self.server_db.find_one_and_update({'_id': str(member.id)}, {'$inc': {'thanks.thanks_recieved': 1,
                                                                                             'thanks.total_recieved': 1}})
-            for _, user_data in enumerate(thanker, thankee):
-                await Level.update_experience(Level(self.bot), ctx.guild.id, user_data['_id'], random.randint(800, 950))
-        await ctx.send(embed=discord.Embed(title=f'\U0001f49d {ctx.author.name} has thanked {thankee.name} \U0001f49d',
-                                           colour=discord.Colour.gold()))
+            await Level.add_experience(Level(self.bot), ctx, member, random.randint(700, 800))
+            await ctx.channel.send(embed=discord.Embed(title=f'\U0001f49d {ctx.author.display_name}'
+                                                             f' has thanked {member.display_name} \U0001f49d',
+                                                       color=discord.Colour.gold()))
 
 
 def setup(bot):
