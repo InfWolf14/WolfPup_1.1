@@ -60,19 +60,20 @@ async def on_member_leave(member):
 
 @bot.event
 async def on_command_error(ctx, error):
+    error = error.__cause__ or error
     try:
         await ctx.message.delete()
     except discord.errors.NotFound:
         pass
-    if isinstance(error, commands.MissingRequiredArgument):
+    if isinstance(type(error), commands.MissingRequiredArgument):
         error = await ctx.send(embed=discord.Embed(title='**[Error]** : Command missing arguments!'))
-    elif isinstance(error, commands.MissingPermissions):
+    elif isinstance(type(error), commands.MissingPermissions):
         error = await ctx.send(embed=discord.Embed(title='**[Error]** : You are missing required permissions!'))
-    elif isinstance(error, commands.CommandNotFound):
+    elif isinstance(type(error), commands.CommandNotFound):
         error = await ctx.send(embed=discord.Embed(title='**[Error]** : Command not found!'))
     else:
         new_embed = discord.Embed(title=f'**[Error]** : {type(error).__name__}',
-                                           description=f'{error.__cause__}')
+                                           description=f'{error}')
         new_embed.set_footer(text='Please contact an administrator')
         await ctx.send(embed=new_embed)
         return

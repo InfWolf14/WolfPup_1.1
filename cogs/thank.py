@@ -19,7 +19,7 @@ class Thank(commands.Cog):
     async def build_thank(self, ctx, member: discord.Member = None):
         self.server_db = self.db['server'][str(ctx.guild.id)]
         new_thank = {'thanks': {'thanks_received': 0, 'total_received': 0,
-                               'thanks_given': 0, 'total_given': 0}}
+                                'thanks_given': 0, 'total_given': 0}}
         if member:
             self.server_db.find_one_and_update({'_id': str(member.id)}, {'$set': new_thank}, upsert=True)
             return
@@ -33,14 +33,14 @@ class Thank(commands.Cog):
         if os.path.isfile(f'config/{ctx.guild.id}/config.json'):
             with open(f'config/{ctx.guild.id}/config.json', 'r') as f:
                 config = json.load(f)
-            if str(ctx.channel.id) not in config['bot_channels']: # <- Change 'not in' to 'in' for release
+            if str(ctx.channel.id) in config['bot_channels']:
                 await ctx.message.delete()
                 error = await ctx.send(embed=discord.Embed(title='This command is __not__ available in bot channels!'))
                 await asyncio.sleep(5)
                 await error.delete()
                 return
         if not member.bot:
-            if ctx.author == None: #member:
+            if ctx.author == member:
                 new_embed = discord.Embed(
                     title='\U0001f441\U0001f441 You tried to thank yourself, shame on you \U0001f441\U0001f441')
                 shame_gifs = ['https://media.giphy.com/media/NSTS6t7qKTiDu/giphy.gif',
@@ -55,11 +55,32 @@ class Thank(commands.Cog):
                                                              f' has thanked {member.display_name} \U0001f49d',
                                                        color=discord.Colour.gold()))
             self.server_db.find_one_and_update({'_id': str(ctx.author.id)}, {'$inc': {'thanks.thanks_given': 1,
-                                                                                                'thanks.total_given': 1}})
+                                                                                      'thanks.total_given': 1}})
             await Level.update_experience(Level(self.bot), str(ctx.guild.id), str(ctx.author.id), random.randint(450, 550))
-            self.server_db.find_one_and_update({'_id': str(member.id)}, {'$inc': {'thanks.thanks_recieved': 1,
-                                                                                            'thanks.total_recieved': 1}})
+            self.server_db.find_one_and_update({'_id': str(member.id)}, {'$inc': {'thanks.thanks_received': 1,
+                                                                                  'thanks.total_received': 1}})
             await Level.update_experience(Level(self.bot), str(ctx.guild.id), str(member.id), random.randint(450, 550))
+
+    @commands.command(name='my_thanks')
+    async def my_thanks(self, ctx):
+        self.server_db = self.db['server'][str(ctx.guild.id)]
+        if os.path.isfile(f'config/{ctx.guild.id}/config.json'):
+            with open(f'config/{ctx.guild.id}/config.json', 'r') as f:
+                config = json.load(f)
+            if str(ctx.channel.id) not in config['bot_channels']:
+                await ctx.message.delete()
+                error = await ctx.send(embed=discord.Embed(title='This command is only available in bot channels!'))
+                await asyncio.sleep(5)
+                await error.delete()
+                return
+        user = self.server_db.find_one({'_id': str(ctx.author.id)})
+        new_embed = discord.Embed(title=f'{ctx.author.display_name}\'s Stats',
+                                  color=discord.Colour.gold())
+        for stat in user['thanks']:
+            new_embed.add_field(name=f'__{str(stat).capitalize().replace("_", " ")}__ :',
+                                value=f'**{user["thanks"][str(stat)]}**',
+                                inline=True)
+        await ctx.send(embed=new_embed)
 
 
 def setup(bot):
