@@ -1,5 +1,6 @@
 import discord
 from discord.ext import commands
+from util import Util
 from mongo import Mongo
 
 
@@ -12,7 +13,11 @@ class Leaderboard(commands.Cog):
     @commands.command(name='leaderboard', aliases=['lb'])
     async def leaderboard(self, ctx, member: discord.Member = None):
         self.server_db = self.db['server'][str(ctx.guild.id)]
-
+        member = member or ctx.author
+        if not Util.check_channel(ctx, False):
+            return
+        user = self.server_db.find()
+        print(str(user))
 
 
 def setup(bot):
