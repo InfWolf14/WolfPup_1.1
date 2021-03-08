@@ -23,7 +23,7 @@ class Profile(commands.Cog):
     @commands.has_guild_permissions(administrator=True)
     async def build_profile(self, ctx, member: discord.Member = None):
         self.server_db = self.db['server'][str(ctx.guild.id)]
-        if not await Util.check_channel(ctx, True):
+        if not Util.check_channel(ctx, True):
             return
         new_profile = {'profile': {'aliases': {
                        'ps': None, 'xb': None, 'uplay': None, 'steam': None, 'ffxiv': None},
@@ -40,7 +40,7 @@ class Profile(commands.Cog):
         """Add your usernames for your game system"""
         username = ' '.join(name)
         self.server_db = self.db['server'][str(ctx.guild.id)]
-        if not await Util.check_channel(ctx, True):
+        if not Util.check_channel(ctx, True):
             return
         for platform in self.sys_aliases:
             if system.upper() in self.sys_aliases[platform]:
@@ -57,7 +57,7 @@ class Profile(commands.Cog):
     async def get(self, ctx, system: str, member: discord.Member = None):
         """Get a users usernames."""
         self.server_db = self.db['server'][str(ctx.guild.id)]
-        if not await Util.check_channel(ctx):
+        if not Util.check_channel(ctx):
             return
         if member is None:
             member = ctx.author
@@ -79,7 +79,7 @@ class Profile(commands.Cog):
         """Search for a user"""
         self.server_db = self.db['server'][str(ctx.guild.id)]
         results = []
-        if not await Util.check_channel(ctx):
+        if not Util.check_channel(ctx):
             return
         user = self.server_db.find()
         for _, user_data in enumerate(user):
@@ -102,7 +102,7 @@ class Profile(commands.Cog):
     async def delete(self, ctx, system):
         """Delete a username"""
         self.server_db = self.db['server'][str(ctx.guild.id)]
-        if not await Util.check_channel(ctx, True):
+        if not Util.check_channel(ctx, True):
             return
         for platform in self.sys_aliases:
             if system.upper() in self.sys_aliases[platform]:
@@ -120,7 +120,7 @@ class Profile(commands.Cog):
     async def profile(self, ctx, member: discord.Member = None):
         """Displays your profile card."""
         self.server_db = self.db['server'][str(ctx.guild.id)]
-        if not await Util.check_channel(ctx):
+        if not Util.check_channel(ctx):
             return
 
     @commands.command()
@@ -128,7 +128,7 @@ class Profile(commands.Cog):
         """Sets the custom wanted text on your profile card. """
         self.server_db = self.db['server'][str(ctx.guild.id)]
         wanted = ' '.join(text)
-        if not await Util.check_channel(ctx, True):
+        if not Util.check_channel(ctx, True):
             return
         if len(wanted) != 0:
             self.server_db.find_one_and_update({'_id': str(ctx.author.id)}, {'$set': {f'profile.wanted_text': wanted}})

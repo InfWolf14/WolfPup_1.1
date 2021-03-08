@@ -18,7 +18,7 @@ class Level(commands.Cog, name='Level'):
     @commands.has_guild_permissions(administrator=True)
     async def build_level(self, ctx, member: discord.Member = None):
         self.server_db = self.db['server'][str(ctx.guild.id)]
-        if not await Util.check_channel(ctx, True):
+        if not Util.check_channel(ctx, True):
             return
         new_level = {'level': 1, 'exp': 0, 'exp_streak': 0, 'timestamp': dt.datetime.utcnow()}
         if member:
@@ -38,7 +38,7 @@ class Level(commands.Cog, name='Level'):
     @commands.command(name='add_experience', hidden=True, pass_context=True, aliases=['xp'])
     @commands.has_guild_permissions(administrator=True)
     async def add_experience(self, ctx, user: discord.Member, amount: int):
-        if not await Util.check_channel(ctx):
+        if not Util.check_channel(ctx):
             return
         if isinstance(user, discord.Member):
             user_level, user_exp = await self.update_experience(str(ctx.guild.id), str(user.id), amount)
