@@ -67,7 +67,7 @@ class Master(commands.Cog, name='Master'):
             self.db['server'].drop_collection(str(ctx.guild.id))
             self.db['server'].create_collection(str(ctx.guild.id))
         else:
-            self.db['server'][str(ctx.guild.id)].find_one_and_delete({'_id': str(member.id)})
+            self.db['server'][str(ctx.guild.id)].find_one_and_delete({'_id': member.id})
         await pending.edit(embed=discord.Embed(title='Rebuilding Levels...'))
         await Level.build_level(Level(self.bot), ctx, member)
         await pending.edit(embed=discord.Embed(title='Rebuilding Profiles...'))

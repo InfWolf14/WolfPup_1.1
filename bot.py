@@ -18,7 +18,7 @@ def get_prefix(bot, message):
     return commands.when_mentioned_or(*prefixes)(bot, message)
 
 
-initial_cogs = ['master', 'cogs.level', 'cogs.profile', 'cogs.thank']
+initial_cogs = ['master', 'cogs.level']
 intents = discord.Intents.default()
 intents.members = True
 bot = commands.Bot(command_prefix=get_prefix, description='A bot designed for GoldxGuns', intents=intents)
@@ -48,7 +48,7 @@ async def on_member_join(member):
     with open(f'config/{str(member.guild.id)}/config.json', 'r') as f:
         config = json.load(f)
     config_channel = bot.get_channel(int(config['config_channel']))
-    await Util.build_db(config_channel, member)
+    await Master.build_db(config_channel, member)
 
 
 @bot.event
@@ -67,18 +67,10 @@ async def on_command_error(ctx, error):
         await ctx.message.delete()
     except discord.errors.NotFound:
         pass
-    if isinstance(type(error), commands.MissingRequiredArgument):
-        error = await ctx.send(embed=discord.Embed(title='**[Error]** : Command missing arguments!'))
-    elif isinstance(type(error), commands.MissingPermissions):
-        error = await ctx.send(embed=discord.Embed(title='**[Error]** : You are missing required permissions!'))
-    elif isinstance(type(error), commands.CommandNotFound):
-        error = await ctx.send(embed=discord.Embed(title='**[Error]** : Command not found!'))
-    else:
-        new_embed = discord.Embed(title=f'**[Error]** : {type(error).__name__}',
-                                  description=f'{error}')
-        new_embed.set_footer(text='Please contact an administrator')
-        await ctx.send(embed=new_embed)
-        return
+    new_embed = discord.Embed(title=f'**[Error]** : {type(error).__name__}',
+                              description=f'{error}')
+    new_embed.set_footer(text=f'Use: [ {ctx.prefix}help ] for assistance')
+    error = await ctx.send(embed=new_embed)
     await asyncio.sleep(5)
     await error.delete()
 

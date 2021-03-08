@@ -16,57 +16,54 @@ class Thank(commands.Cog):
     @commands.has_guild_permissions(administrator=True)
     async def build_thank(self, ctx, member: discord.Member = None):
         self.server_db = self.db['server'][str(ctx.guild.id)]
-        if not Util.check_channel(ctx, True):
-            return
-        new_thank = {'thanks': {'thanks_received': 0, 'total_received': 0,
-                                'thanks_given': 0, 'total_given': 0}}
-        if member:
-            self.server_db.find_one_and_update({'_id': str(member.id)}, {'$set': new_thank}, upsert=True)
-            return
-        for member in ctx.guild.members:
-            if not member.bot:
+        if await Util.check_channel(ctx, True):
+            new_thank = {'thanks': {'thanks_received': 0, 'total_received': 0,
+                                    'thanks_given': 0, 'total_given': 0}}
+            if member:
                 self.server_db.find_one_and_update({'_id': str(member.id)}, {'$set': new_thank}, upsert=True)
+                return
+            for member in ctx.guild.members:
+                if not member.bot:
+                    self.server_db.find_one_and_update({'_id': str(member.id)}, {'$set': new_thank}, upsert=True)
 
     @commands.command(name='thank', aliases=['thanks'])
     async def thank(self, ctx, member: discord.Member):
         self.server_db = self.db['server'][str(ctx.guild.id)]
-        if not Util.check_channel(ctx, False):
-            return
-        if not member.bot:
-            if ctx.author == member:
-                new_embed = discord.Embed(
-                    title='\U0001f441\U0001f441 You tried to thank yourself, shame on you \U0001f441\U0001f441')
-                shame_gifs = ['https://media.giphy.com/media/NSTS6t7qKTiDu/giphy.gif',
-                              'https://media.giphy.com/media/vX9WcCiWwUF7G/giphy.gif',
-                              'https://media.giphy.com/media/eP1fobjusSbu/giphy.gif',
-                              'https://media.giphy.com/media/Db3OfoegpwajK/giphy.gif',
-                              'https://media.giphy.com/media/8UGoOaR1lA1uaAN892/giphy.gif']
-                new_embed.set_image(url=random.choice(shame_gifs))
-                await ctx.send(embed=new_embed)
-                return
-            await ctx.channel.send(embed=discord.Embed(title=f'\U0001f49d {ctx.author.display_name}'
-                                                             f' has thanked {member.display_name} \U0001f49d',
-                                                       color=discord.Colour.gold()))
-            self.server_db.find_one_and_update({'_id': str(ctx.author.id)}, {'$inc': {'thanks.thanks_given': 1,
-                                                                                      'thanks.total_given': 1}})
-            await Level.update_experience(Level(self.bot), str(ctx.guild.id), str(ctx.author.id), random.randint(450, 550))
-            self.server_db.find_one_and_update({'_id': str(member.id)}, {'$inc': {'thanks.thanks_received': 1,
-                                                                                  'thanks.total_received': 1}})
-            await Level.update_experience(Level(self.bot), str(ctx.guild.id), str(member.id), random.randint(450, 550))
+        if await Util.check_channel(ctx, False):
+            if not member.bot:
+                if ctx.author == member:
+                    new_embed = discord.Embed(title='\U0001f441\U0001f441 You tried to thank yourself,'
+                                                    ' shame on you \U0001f441\U0001f441')
+                    shame_gifs = ['https://media.giphy.com/media/NSTS6t7qKTiDu/giphy.gif',
+                                  'https://media.giphy.com/media/vX9WcCiWwUF7G/giphy.gif',
+                                  'https://media.giphy.com/media/eP1fobjusSbu/giphy.gif',
+                                  'https://media.giphy.com/media/Db3OfoegpwajK/giphy.gif',
+                                  'https://media.giphy.com/media/8UGoOaR1lA1uaAN892/giphy.gif']
+                    new_embed.set_image(url=random.choice(shame_gifs))
+                    await ctx.send(embed=new_embed)
+                    return
+                await ctx.channel.send(embed=discord.Embed(title=f'\U0001f49d {ctx.author.display_name}'
+                                                                 f' has thanked {member.display_name} \U0001f49d',
+                                                           color=discord.Colour.gold()))
+                self.server_db.find_one_and_update({'_id': str(ctx.author.id)}, {'$inc': {'thanks.thanks_given': 1,
+                                                                                          'thanks.total_given': 1}})
+                await Level.update_experience(Level(self.bot), str(ctx.guild.id), str(ctx.author.id), random.randint(450, 550))
+                self.server_db.find_one_and_update({'_id': str(member.id)}, {'$inc': {'thanks.thanks_received': 1,
+                                                                                      'thanks.total_received': 1}})
+                await Level.update_experience(Level(self.bot), str(ctx.guild.id), str(member.id), random.randint(450, 550))
 
     @commands.command(name='my_thanks')
     async def my_thanks(self, ctx):
         self.server_db = self.db['server'][str(ctx.guild.id)]
-        if not Util.check_channel(ctx, True):
-            return
-        user = self.server_db.find_one({'_id': str(ctx.author.id)})
-        new_embed = discord.Embed(title=f'{ctx.author.display_name}\'s Stats',
-                                  color=discord.Colour.gold())
-        for stat in user['thanks']:
-            new_embed.add_field(name=f'**{str(stat).capitalize().replace("_", " ")}** :',
-                                value=f'{user["thanks"][str(stat)]}',
-                                inline=True)
-        await ctx.send(embed=new_embed)
+        if await Util.check_channel(ctx, True):
+            user = self.server_db.find_one({'_id': str(ctx.author.id)})
+            new_embed = discord.Embed(title=f'{ctx.author.display_name}\'s Stats',
+                                      color=discord.Colour.gold())
+            for stat in user['thanks']:
+                new_embed.add_field(name=f'**{str(stat).capitalize().replace("_", " ")}** :',
+                                    value=f'{user["thanks"][str(stat)]}',
+                                    inline=True)
+            await ctx.send(embed=new_embed)
 
 
 def setup(bot):

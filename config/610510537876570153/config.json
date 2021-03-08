@@ -1,1 +1,1 @@
-{"prefix": "w^", "blacklist_exp_channels":  [], "bot_channels":  ["742534075583037540"]}
+{"prefix": "w^", "exp_channel_blacklist":  [742534075583037540], "bot_channels":  [742534075583037540]}
