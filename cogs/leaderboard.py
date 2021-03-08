@@ -22,7 +22,7 @@ class Leaderboard(commands.Cog):
             if leaderboard is not None:
                 for stat in self.leaderboards:
                     if leaderboard in self.leaderboards[stat]:
-                        users = self.server_db.find().sort(leaderboard, -1)
+                        users = self.server_db.find().sort(stat, -1)
                         rank = 1
                         listing, list_user, f_name, user_str = '', '', '', ''
                         stat_1, stat_2, my_stat = None, None, None
