@@ -1,11 +1,8 @@
-import io
 import asyncio
 import discord
-from discord import File
 from discord.ext import commands
-from util import Util
-from mongo import Mongo
-from PIL import Image, ImageDraw, ImageFont
+from util.util import Util
+from util.util import Mongo
 
 
 class Profile(commands.Cog):

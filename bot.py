@@ -5,7 +5,7 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 import discord
 from discord.ext import commands
 from master import Master
-from mongo import Mongo
+from util.mongo import Mongo
 
 
 def get_prefix(bot, message):
@@ -91,5 +91,5 @@ async def on_disconnect():
 
 
 print('\nLoading token and connecting to client...')
-token = open("token.txt", "r").readline()
+token = open('token', 'r').readline()
 bot.run(token, bot=True, reconnect=True)

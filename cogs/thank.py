@@ -1,8 +1,8 @@
 import random
 import discord
 from discord.ext import commands
-from util import Util
-from mongo import Mongo
+from util.util import Util
+from util.util import Mongo
 from cogs.level import Level
 
 
