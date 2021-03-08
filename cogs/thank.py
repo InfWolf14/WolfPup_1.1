@@ -77,8 +77,8 @@ class Thank(commands.Cog):
         new_embed = discord.Embed(title=f'{ctx.author.display_name}\'s Stats',
                                   color=discord.Colour.gold())
         for stat in user['thanks']:
-            new_embed.add_field(name=f'__{str(stat).capitalize().replace("_", " ")}__ :',
-                                value=f'**{user["thanks"][str(stat)]}**',
+            new_embed.add_field(name=f'**{str(stat).capitalize().replace("_", " ")}** :',
+                                value=f'{user["thanks"][str(stat)]}',
                                 inline=True)
         await ctx.send(embed=new_embed)
 

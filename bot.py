@@ -50,6 +50,7 @@ async def on_member_join(member):
     config_channel = bot.get_channel(int(config['config_channel']))
     await Util.build_db(config_channel, member)
 
+
 @bot.event
 async def on_member_leave(member):
     with open(f'config/{str(member.guild.id)}/config.json', 'r') as f:
@@ -57,6 +58,7 @@ async def on_member_leave(member):
     config_channel = bot.get_channel(int(config['config_channel']))
     Mongo.init_db(Mongo(Mongo(bot)))['server'][str(member.guild.id)].find_one_and_delete({'_id': str(member.id)})
     config_channel.send(embed=discord.Embed(title=f'{member.displayname} left'))
+
 
 @bot.event
 async def on_command_error(ctx, error):
@@ -73,12 +75,13 @@ async def on_command_error(ctx, error):
         error = await ctx.send(embed=discord.Embed(title='**[Error]** : Command not found!'))
     else:
         new_embed = discord.Embed(title=f'**[Error]** : {type(error).__name__}',
-                                           description=f'{error}')
+                                  description=f'{error}')
         new_embed.set_footer(text='Please contact an administrator')
         await ctx.send(embed=new_embed)
         return
     await asyncio.sleep(5)
     await error.delete()
+
 
 @bot.event
 async def on_ready():

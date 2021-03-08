@@ -1,6 +1,4 @@
-import os
 import asyncio
-import json
 import discord
 from discord.ext import commands
 from mongo import Mongo
@@ -27,7 +25,9 @@ class Util(commands.Cog, name='Utility'):
             self.bot.load_extension(cog)
         except Exception as e:
             await discord.Message.add_reaction(ctx.message, '\U0000274E')
-            await ctx.send(f'Failed to load module: {type(e).__name__} - {e}')
+            error = await ctx.send(f'Failed to load module: {type(e).__name__} - {e}')
+            await asyncio.sleep(10)
+            await error.delete()
         else:
             await discord.Message.add_reaction(ctx.message, '\U00002705')
 
@@ -38,7 +38,9 @@ class Util(commands.Cog, name='Utility'):
             self.bot.unload_extension(cog)
         except Exception as e:
             await discord.Message.add_reaction(ctx.message, '\U0000274E')
-            await ctx.send(f'Failed to unload module: {type(e).__name__} - {e}')
+            error = await ctx.send(f'Failed to unload module: {type(e).__name__} - {e}')
+            await asyncio.sleep(10)
+            await error.delete()
         else:
             await discord.Message.add_reaction(ctx.message, '\U00002705')
 
@@ -50,7 +52,9 @@ class Util(commands.Cog, name='Utility'):
             self.bot.load_extension(cog)
         except Exception as e:
             await discord.Message.add_reaction(ctx.message, '\U0000274E')
-            await ctx.send(f'Failed to reload module: {type(e).__name__} - {e}')
+            error = await ctx.send(f'Failed to reload module: {type(e).__name__} - {e}')
+            await asyncio.sleep(10)
+            await error.delete()
         else:
             await discord.Message.add_reaction(ctx.message, '\U00002705')
 
