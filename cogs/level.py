@@ -29,11 +29,12 @@ class Level(commands.Cog, name='Level'):
                 self.server_db.find_one_and_update({"_id": str(member.id)}, {'$set': new_level}, upsert=True)
 
     @commands.command(name='stats', pass_context=True)
-    async def stats(self, ctx, user: discord.Member):
+    async def stats(self, ctx, member: discord.Member = None):
         """Returns a user's current profile level and experience"""
-        if not await Util.check_channel(ctx, True):
+        member = member or ctx.author
+        if not Util.check_channel(ctx, True):
             return
-        await self.add_experience(ctx, user, 0)
+        await self.add_experience(ctx, member, 0)
 
     @commands.command(name='add_experience', hidden=True, pass_context=True, aliases=['xp'])
     @commands.has_guild_permissions(administrator=True)
