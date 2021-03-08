@@ -14,7 +14,7 @@ class Leaderboard(commands.Cog):
     async def leaderboard(self, ctx, member: discord.Member = None):
         self.server_db = self.db['server'][str(ctx.guild.id)]
         member = member or ctx.author
-        if not Util.check_channel(ctx, False):
+        if not await Util.check_channel(ctx, False):
             return
         user = self.server_db.find()
         print(str(user))

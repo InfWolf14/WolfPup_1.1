@@ -16,7 +16,7 @@ class Thank(commands.Cog):
     @commands.has_guild_permissions(administrator=True)
     async def build_thank(self, ctx, member: discord.Member = None):
         self.server_db = self.db['server'][str(ctx.guild.id)]
-        if not Util.check_channel(ctx, True):
+        if not await Util.check_channel(ctx, True):
             return
         new_thank = {'thanks': {'thanks_received': 0, 'total_received': 0,
                                 'thanks_given': 0, 'total_given': 0}}
@@ -30,7 +30,7 @@ class Thank(commands.Cog):
     @commands.command(name='thank', aliases=['thanks'])
     async def thank(self, ctx, member: discord.Member):
         self.server_db = self.db['server'][str(ctx.guild.id)]
-        if not Util.check_channel(ctx, False):
+        if not await Util.check_channel(ctx, False):
             return
         if not member.bot:
             if ctx.author == member:
@@ -57,7 +57,7 @@ class Thank(commands.Cog):
     @commands.command(name='my_thanks')
     async def my_thanks(self, ctx):
         self.server_db = self.db['server'][str(ctx.guild.id)]
-        if not Util.check_channel(ctx, True):
+        if not await Util.check_channel(ctx, True):
             return
         user = self.server_db.find_one({'_id': str(ctx.author.id)})
         new_embed = discord.Embed(title=f'{ctx.author.display_name}\'s Stats',
