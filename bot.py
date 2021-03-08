@@ -5,7 +5,7 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 import discord
 from discord.ext import commands
 from master import Master
-from util.mongo import Mongo
+from lib.mongo import Mongo
 
 
 def get_prefix(bot, message):
@@ -18,7 +18,7 @@ def get_prefix(bot, message):
     return commands.when_mentioned_or(*prefixes)(bot, message)
 
 
-initial_cogs = ['master', 'cogs.level']
+initial_cogs = ['master', 'cogs.level', 'cogs.profile', 'cogs.thank', 'cogs.leaderboard']
 intents = discord.Intents.default()
 intents.members = True
 bot = commands.Bot(command_prefix=get_prefix, description='A bot designed for GoldxGuns', intents=intents)

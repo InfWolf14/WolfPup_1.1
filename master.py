@@ -1,7 +1,7 @@
 import asyncio
 import discord
 from discord.ext import commands
-from util.mongo import Mongo
+from lib.mongo import Mongo
 from cogs.level import Level
 from cogs.profile import Profile
 from cogs.thank import Thank

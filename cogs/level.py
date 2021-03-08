@@ -3,8 +3,8 @@ from math import sqrt, floor
 import datetime as dt
 import discord
 from discord.ext import commands
-from util.util import Util
-from util.util import Mongo
+from lib.util import Util
+from lib.mongo import Mongo
 from pymongo import ReturnDocument
 
 

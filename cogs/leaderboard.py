@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands
-from util.util import Util
-from util.util import Mongo
+from lib.util import Util
+from lib.mongo import Mongo
 
 
 class Leaderboard(commands.Cog):
@@ -28,19 +28,20 @@ class Leaderboard(commands.Cog):
                         stat_1, stat_2, my_stat = None, None, None
                         for user in users:
                             list_user = self.bot.get_user(int(user["_id"]))
-                            if rank < 21:
-                                try:
-                                    stat_1, stat_2 = stat.split('.')
-                                except ValueError: pass
-                                if stat_2 is not None:
-                                    f_name = f'**__Stat:__ {stat_2.capitalize().replace("_", " ")}**'
-                                    user_str = f'`[{str(rank)}.]` *{list_user.name} :* {user[stat_1][stat_2]}'
-                                else:
-                                    f_name = f'**__Stat:__ {stat.capitalize()}**'
-                                    user_str = f'`[{str(rank)}.]` *{list_user.name} :* {user[stat]}'
-                                if list_user == ctx.author:
-                                    my_stat = user_str
-                                    user_str = f'**>>>** {user_str}'
+                            try:
+                                stat_1, stat_2 = stat.split('.')
+                            except ValueError:
+                                pass
+                            if stat_2 is not None:
+                                f_name = f'**__Stat:__ {stat_2.capitalize().replace("_", " ")}**'
+                                user_str = f'`[{str(rank)}.]` *{list_user.name} :* {user[stat_1][stat_2]}'
+                            else:
+                                f_name = f'**__Stat:__ {stat.capitalize()}**'
+                                user_str = f'`[{str(rank)}.]` *{list_user.name} :* {user[stat]}'
+                            if list_user == ctx.author:
+                                my_stat = user_str
+                                user_str = f'**>>>** {user_str}'
+                            if rank <= 20:
                                 listing += f'{user_str}\n'
                                 rank += 1
                         if my_stat is not None:
