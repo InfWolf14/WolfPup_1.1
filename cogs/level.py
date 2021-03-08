@@ -1,10 +1,9 @@
-import os
-import json
 import random
 from math import sqrt, floor
 import datetime as dt
 import discord
 from discord.ext import commands
+from util import Util
 from mongo import Mongo
 from pymongo import ReturnDocument
 
@@ -19,6 +18,8 @@ class Level(commands.Cog, name='Level'):
     @commands.has_guild_permissions(administrator=True)
     async def build_level(self, ctx, member: discord.Member = None):
         self.server_db = self.db['server'][str(ctx.guild.id)]
+        if not Util.check_channel(ctx, True):
+            return
         new_level = {'level': 1, 'exp': 0, 'exp_streak': 0, 'timestamp': dt.datetime.utcnow()}
         if member:
             self.server_db.find_one_and_update({"_id": str(member.id)}, {'$set': new_level}, upsert=True)
@@ -30,11 +31,15 @@ class Level(commands.Cog, name='Level'):
     @commands.command(name='stats', pass_context=True)
     async def stats(self, ctx, user: discord.Member):
         """Returns a user's current profile level and experience"""
+        if not Util.check_channel(ctx, True):
+            return
         await self.add_experience(ctx, user, 0)
 
     @commands.command(name='add_experience', hidden=True, pass_context=True, aliases=['xp'])
     @commands.has_guild_permissions(administrator=True)
     async def add_experience(self, ctx, user: discord.Member, amount: int):
+        if not Util.check_channel(ctx):
+            return
         if isinstance(user, discord.Member):
             user_level, user_exp = await self.update_experience(str(ctx.guild.id), str(user.id), amount)
             await ctx.send(embed=discord.Embed(title=f'{user.display_name}\'s Stats',
@@ -54,11 +59,6 @@ class Level(commands.Cog, name='Level'):
 
     @commands.Cog.listener()
     async def on_message(self, message):
-        if os.path.isfile(f'config/{message.guild.id}/config.json'):
-            with open(f'config/{message.guild.id}/config.json', 'r') as f:
-                config = json.load(f)
-            if str(message.channel.id) in config['bot_channels']:
-                return
         if not message.author.bot:
             self.server_db = self.db['server'][str(message.guild.id)]
             user = self.server_db.find_one({'_id': str(message.author.id)})

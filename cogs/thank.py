@@ -1,9 +1,8 @@
-import os
-import json
 import asyncio
 import random
 import discord
 from discord.ext import commands
+from util import Util
 from mongo import Mongo
 from cogs.level import Level
 
@@ -18,6 +17,8 @@ class Thank(commands.Cog):
     @commands.has_guild_permissions(administrator=True)
     async def build_thank(self, ctx, member: discord.Member = None):
         self.server_db = self.db['server'][str(ctx.guild.id)]
+        if not Util.check_channel(ctx, True):
+            return
         new_thank = {'thanks': {'thanks_received': 0, 'total_received': 0,
                                 'thanks_given': 0, 'total_given': 0}}
         if member:
@@ -30,15 +31,8 @@ class Thank(commands.Cog):
     @commands.command(name='thank', aliases=['thanks'])
     async def thank(self, ctx, member: discord.Member):
         self.server_db = self.db['server'][str(ctx.guild.id)]
-        if os.path.isfile(f'config/{ctx.guild.id}/config.json'):
-            with open(f'config/{ctx.guild.id}/config.json', 'r') as f:
-                config = json.load(f)
-            if str(ctx.channel.id) in config['bot_channels']:
-                await ctx.message.delete()
-                error = await ctx.send(embed=discord.Embed(title='This command is __not__ available in bot channels!'))
-                await asyncio.sleep(5)
-                await error.delete()
-                return
+        if not Util.check_channel(ctx, False):
+            return
         if not member.bot:
             if ctx.author == member:
                 new_embed = discord.Embed(
@@ -64,15 +58,8 @@ class Thank(commands.Cog):
     @commands.command(name='my_thanks')
     async def my_thanks(self, ctx):
         self.server_db = self.db['server'][str(ctx.guild.id)]
-        if os.path.isfile(f'config/{ctx.guild.id}/config.json'):
-            with open(f'config/{ctx.guild.id}/config.json', 'r') as f:
-                config = json.load(f)
-            if str(ctx.channel.id) not in config['bot_channels']:
-                await ctx.message.delete()
-                error = await ctx.send(embed=discord.Embed(title='This command is only available in bot channels!'))
-                await asyncio.sleep(5)
-                await error.delete()
-                return
+        if not Util.check_channel(ctx, True):
+            return
         user = self.server_db.find_one({'_id': str(ctx.author.id)})
         new_embed = discord.Embed(title=f'{ctx.author.display_name}\'s Stats',
                                   color=discord.Colour.gold())
