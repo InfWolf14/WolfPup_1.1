@@ -19,7 +19,8 @@ class Level(commands.Cog, name='Level'):
     async def build_level(self, ctx, member: discord.Member = None):
         self.server_db = self.db['server'][str(ctx.guild.id)]
         if await Util.check_channel(ctx, True):
-            new_level = {'level': 1, 'exp': 0, 'exp_streak': 0, 'timestamp': dt.datetime.utcnow(), 'flags': {'daily': True}}
+            new_level = {'level': 1, 'exp': 0, 'exp_streak': 0, 'timestamp': dt.datetime.utcnow(),
+                         'flags': {'daily': True, 'thank': True}}
             if member:
                 self.server_db.find_one_and_update({"_id": str(member.id)}, {'$set': new_level}, upsert=True)
                 return

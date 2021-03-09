@@ -17,7 +17,7 @@ class Thank(commands.Cog):
     async def build_thank(self, ctx, member: discord.Member = None):
         self.server_db = self.db['server'][str(ctx.guild.id)]
         if await Util.check_channel(ctx, True):
-            new_thank = {'flags': {'thank': True}, 'thanks': {'thanks_received': 0, 'total_received': 0,
+            new_thank = {'thanks': {'thanks_received': 0, 'total_received': 0,
                                                               'thanks_given': 0, 'total_given': 0}}
             if member and not member.bot:
                 self.server_db.find_one_and_update({'_id': str(member.id)}, {'$set': new_thank}, upsert=True)
