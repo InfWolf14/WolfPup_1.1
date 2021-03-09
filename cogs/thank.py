@@ -49,7 +49,7 @@ class Thank(commands.Cog):
                         return
                     new_embed = discord.Embed(title=f'\U0001f49d {ctx.author.display_name}'
                                                     f' *has thanked* {member.display_name} \U0001f49d',
-                                              description=reason,
+                                              description=f'*{reason}*',
                                               color=discord.Colour.gold())
                     await ctx.send(embed=new_embed)
                     self.server_db.find_one_and_update({'_id': str(ctx.author.id)}, {'$set': {'flags.thank': False}})
