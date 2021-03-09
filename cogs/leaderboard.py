@@ -7,7 +7,7 @@ from lib.mongo import Mongo
 class Leaderboard(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.db = Mongo.init_db(Mongo(self.bot))
+        self.db = Mongo.init_db(Mongo())
         self.server_db = None
         self.leaderboards = {'exp': {'exp', 'experience', 'xp'},
                              'thanks.thanks_received': {'thankee'},
