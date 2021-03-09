@@ -18,8 +18,12 @@ class Profile(commands.Cog):
 
     @commands.command(name='build_profile', hidden=True, aliases=['rebuild_profile'])
     @commands.has_guild_permissions(administrator=True)
-    async def build_profile(self, ctx, member: discord.Member = None):
+    async def build_profile(self, ctx, member: discord.Member = None, pending=None):
         self.server_db = self.db['server'][str(ctx.guild.id)]
+        if pending:
+            await pending.edit(embed=discord.Embed(title='Rebuilding Profile stats...'))
+        else:
+            pending = await ctx.send(embed=discord.Embed(title='Rebuilding Profile stats...'))
         if await Util.check_channel(ctx, True):
             new_profile = {'profile': {'aliases': {
                            'ps': None, 'xb': None, 'uplay': None, 'steam': None, 'ffxiv': None},
@@ -30,6 +34,8 @@ class Profile(commands.Cog):
             for member in ctx.guild.members:
                 if not member.bot:
                     self.server_db.find_one_and_update({'_id': str(member.id)}, {'$set': new_profile}, upsert=True)
+            await pending.edit(embed=discord.Embed(title='Done'))
+            return pending
 
     @commands.command(name='set', aliases=['add'])
     async def set(self, ctx, system: str, *name: str):
@@ -42,7 +48,8 @@ class Profile(commands.Cog):
                     self.server_db.find_one_and_update({'_id': str(ctx.author.id)},
                                                        {'$set': {f'profile.aliases.{platform.lower()}': username}})
                     await ctx.send(embed=discord.Embed(title='Successfully changed Profile',
-                                                       description=f'{platform} -> {username}'))
+                                                       description=f'{platform} **\u27A4** {username}',
+                                                       color=discord.Colour.gold()))
                     return
             error = await ctx.send(embed=discord.Embed(title='Error: invalid platform'))
             await asyncio.sleep(5)
@@ -62,7 +69,8 @@ class Profile(commands.Cog):
                         username = user_data['profile']['aliases'][platform.lower()]
                         if username is None:
                             username = 'N/A'
-                        await ctx.send(embed=discord.Embed(title=f'{platform} : {username}'))
+                        await ctx.send(embed=discord.Embed(title=f'{platform} **=** {username}',
+                                                           color=discord.Colour.gold()))
                         return
             error = await ctx.send(embed=discord.Embed(title='Error: invalid platform'))
             await asyncio.sleep(5)
@@ -87,7 +95,8 @@ class Profile(commands.Cog):
                             results.append(member.mention)
             if len(results) > 0:
                 await ctx.send(embed=discord.Embed(title=f'Found {len(results)} match(es):',
-                                                   description='\n'.join(results)))
+                                                   description='\n'.join(results),
+                                                   color=discord.Colour.gold()))
             else:
                 await ctx.send(embed=discord.Embed(title=f'No Matches Found'))
 
@@ -101,7 +110,8 @@ class Profile(commands.Cog):
                     self.server_db.find_one_and_update({'_id': str(ctx.author.id)},
                                                        {'$set': {f'profile.aliases.{platform.lower()}': None}})
                     await ctx.send(embed=discord.Embed(title='Successfully changed Profile',
-                                                       description=f'{platform} -> None'))
+                                                       description=f'{platform} **\u27A4** None',
+                                                       color=discord.Colour.gold()))
                     return
                 error = await ctx.send(embed=discord.Embed(title='Error: invalid platform'))
                 await asyncio.sleep(5)

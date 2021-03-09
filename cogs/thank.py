@@ -14,8 +14,12 @@ class Thank(commands.Cog):
 
     @commands.command(name='build_thank', hidden=True, aliases=['rebuild_thank'])
     @commands.has_guild_permissions(administrator=True)
-    async def build_thank(self, ctx, member: discord.Member = None):
+    async def build_thank(self, ctx, member: discord.Member = None, pending=None):
         self.server_db = self.db['server'][str(ctx.guild.id)]
+        if pending:
+            await pending.edit(embed=discord.Embed(title='Rebuilding Thank stats...'))
+        else:
+            pending = await ctx.send(embed=discord.Embed(title='Rebuilding Thank stats...'))
         if await Util.check_channel(ctx, True):
             new_thank = {'thanks': {'thanks_received': 0, 'total_received': 0,
                                     'thanks_given': 0, 'total_given': 0}}
@@ -25,6 +29,8 @@ class Thank(commands.Cog):
             for member in ctx.guild.members:
                 if not member.bot:
                     self.server_db.find_one_and_update({'_id': str(member.id)}, {'$set': new_thank}, upsert=True)
+            await pending.edit(embed=discord.Embed(title='Done'))
+            return pending
 
     @commands.command(name='thank', aliases=['thanks'])
     async def thank(self, ctx, member: discord.Member, *args):

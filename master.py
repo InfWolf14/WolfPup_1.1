@@ -70,12 +70,9 @@ class Master(commands.Cog, name='Master'):
                 self.db['server'].create_collection(str(ctx.guild.id))
             else:
                 self.db['server'][str(ctx.guild.id)].find_one_and_delete({'_id': member.id})
-            await pending.edit(embed=discord.Embed(title='Rebuilding Level stats...'))
-            await Level.build_level(Level(self.bot), ctx, member)
-            await pending.edit(embed=discord.Embed(title='Rebuilding Profile stats...'))
-            await Profile.build_profile(Profile(self.bot), ctx, member)
-            await pending.edit(embed=discord.Embed(title='Rebuilding Thank stats...'))
-            await Thank.build_thank(Thank(self.bot), ctx, member)
+            pending = await Level.build_level(Level(self.bot), ctx, member, pending)
+            pending = await Profile.build_profile(Profile(self.bot), ctx, member, pending)
+            pending = await Thank.build_thank(Thank(self.bot), ctx, member, pending)
             if member is None:
                 await pending.edit(embed=discord.Embed(title='Server Rebuild Complete',
                                                        description=f'Server ID: {str(ctx.guild.id)}'))

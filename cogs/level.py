@@ -16,8 +16,12 @@ class Level(commands.Cog, name='Level'):
 
     @commands.command(name='build_level', hidden=True, aliases=['rebuild_level'])
     @commands.has_guild_permissions(administrator=True)
-    async def build_level(self, ctx, member: discord.Member = None):
+    async def build_level(self, ctx, member: discord.Member = None, pending=None):
         self.server_db = self.db['server'][str(ctx.guild.id)]
+        if pending:
+            await pending.edit(embed=discord.Embed(title='Rebuilding Level stats...'))
+        else:
+            pending = await ctx.send(embed=discord.Embed(title='Rebuilding Level stats...'))
         if await Util.check_channel(ctx, True):
             new_level = {'level': 1, 'exp': 0, 'exp_streak': 0, 'timestamp': dt.datetime.utcnow(),
                          'flags': {'daily': True, 'thank': True}}
@@ -26,7 +30,10 @@ class Level(commands.Cog, name='Level'):
                 return
             for member in ctx.guild.members:
                 if not member.bot:
+                    new_level['exp'] = random.randint(200, 27150)
                     self.server_db.find_one_and_update({"_id": str(member.id)}, {'$set': new_level}, upsert=True)
+            await pending.edit(embed=discord.Embed(title='Done'))
+            return pending
 
     @commands.command(name='stats', pass_context=True)
     async def stats(self, ctx, member: discord.Member = None):
