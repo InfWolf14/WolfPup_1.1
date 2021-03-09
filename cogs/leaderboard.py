@@ -10,47 +10,55 @@ class Leaderboard(commands.Cog):
         self.db = Mongo.init_db(Mongo())
         self.server_db = None
         self.leaderboards = {'exp': {'exp', 'experience', 'xp'},
-                             'thanks.thanks_received': {'thankee'},
-                             'thanks.thanks_given': {'thanker'}}
+                             'thanks.thanks_received': {'thankee', 'thanks received'},
+                             'thanks.thanks_given': {'thanker', 'thanks given'}}
 
     @commands.command(name='leaderboard', aliases=['lb'])
-    async def leaderboard(self, ctx, leaderboard: str = None):
+    async def leaderboard(self, ctx, *args):
         self.server_db = self.db['server'][str(ctx.guild.id)]
+        leaderboard = None
+        if args:
+            leaderboard = ' '.join(args)
         if await Util.check_channel(ctx):
-            new_embed = discord.Embed(title=f'{ctx.guild.name} Leaderboard',
+            new_embed = discord.Embed(title=f':trophy: __**User Leaderboards**__ :trophy:',
                                       color=discord.Colour.gold())
-            if leaderboard is not None:
-                for stat in self.leaderboards:
+            new_embed.set_author(name=ctx.guild.name, icon_url=ctx.guild.icon_url)
+            new_embed.set_footer(text=f'Results provided by: {self.bot.user.name}', icon_url=self.bot.user.avatar_url)
+            for stat in self.leaderboards:
+                if leaderboard is not None:
                     if leaderboard in self.leaderboards[stat]:
-                        users = self.server_db.find().sort(stat, -1)
-                        rank = 1
-                        listing, list_user, f_name, user_str = '', '', '', ''
-                        stat_1, stat_2, my_stat = None, None, None
-                        for user in users:
-                            list_user = self.bot.get_user(int(user["_id"]))
-                            try:
-                                stat_1, stat_2 = stat.split('.')
-                            except ValueError:
-                                pass
-                            if stat_2 is not None:
-                                f_name = f'**__Stat:__ {stat_2.capitalize().replace("_", " ")}**'
-                                user_str = f'`[{str(rank)}.]` *{list_user.name} :* {user[stat_1][stat_2]}'
-                            else:
-                                f_name = f'**__Stat:__ {stat.capitalize()}**'
-                                user_str = f'`[{str(rank)}.]` *{list_user.name} :* {user[stat]}'
-                            if list_user == ctx.author:
-                                my_stat = user_str
-                                user_str = f'**>>>** {user_str}'
-                            if rank <= 20:
-                                listing += f'{user_str}\n'
-                                rank += 1
-                        if my_stat is not None:
-                            listing += f'\n__**Your Ranking:**__\n{my_stat}'
-                        new_embed.add_field(name=f_name,
-                                            value=listing,
-                                            inline=True)
-                        await ctx.send(embed=new_embed)
-                        return
+                        leaderboard = stat
+                    else:
+                        continue
+                print('running')
+                users = self.server_db.find().sort(stat, -1)
+                rank = 1
+                listing, list_user, f_name, user_str = '', '', '', ''
+                stat_1, stat_2, my_stat = None, None, None
+                for user in users:
+                    list_user = self.bot.get_user(int(user["_id"]))
+                    try:
+                        stat_1, stat_2 = stat.split('.')
+                    except ValueError:
+                        pass
+                    if stat_2 is not None:
+                        f_name = f'**{stat_2.capitalize().replace("_", " ")}**'
+                        user_str = f'`[{str(rank)}.]` *{list_user.name} :* {user[stat_1][stat_2]}'
+                    else:
+                        f_name = f'**{stat.capitalize()}**'
+                        user_str = f'`[{str(rank)}.]` *{list_user.name} :* {user[stat]}'
+                    if list_user == ctx.author:
+                        my_stat = user_str
+                        user_str = f'**\u27A4** {user_str} '
+                    if rank <= 15:
+                        listing += f'{user_str}\n'
+                        rank += 1
+                if my_stat is not None:
+                    listing += f'\n__**Your Ranking:**__\n{my_stat}'
+                new_embed.add_field(name=f_name,
+                                    value=listing,
+                                    inline=True)
+            await ctx.send(embed=new_embed)
 
 
 def setup(bot):

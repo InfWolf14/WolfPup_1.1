@@ -17,7 +17,7 @@ class Master(commands.Cog, name='Master'):
     @commands.command(name='ping', hidden=True)
     @commands.is_owner()
     async def ping(self, ctx):
-        await ctx.send(f':ping_pong:**Pong!**⠀{round(self.bot.latency, 3)}ms')
+        await ctx.send(f':ping_pong: **Pong!**⠀{round(self.bot.latency, 3)}ms')
 
     @commands.command(name='load', hidden=True)
     @commands.is_owner()
