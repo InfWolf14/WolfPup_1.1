@@ -81,6 +81,7 @@ class Profile(commands.Cog):
         """Search for a user"""
         self.server_db = self.db['server'][str(ctx.guild.id)]
         results = []
+        count = 0
         if await Util.check_channel(ctx):
             user = self.server_db.find()
             for _, user_data in enumerate(user):
@@ -91,8 +92,9 @@ class Profile(commands.Cog):
                             query = query.lower()
                             username = username.lower()
                         if query in username and user_data['_id'] not in results:
+                            count += 1
                             member = await ctx.guild.fetch_member(int(user_data['_id']))
-                            results.append(member.mention)
+                            results.append(f'`[{str(count)}.]` {member.mention}')
             if len(results) > 0:
                 await ctx.send(embed=discord.Embed(title=f'Found {len(results)} match(es):',
                                                    description='\n'.join(results),
