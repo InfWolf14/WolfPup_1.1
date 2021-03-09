@@ -48,7 +48,7 @@ class Profile(commands.Cog):
                     self.server_db.find_one_and_update({'_id': str(ctx.author.id)},
                                                        {'$set': {f'profile.aliases.{platform.lower()}': username}})
                     await ctx.send(embed=discord.Embed(title='Successfully changed Profile',
-                                                       description=f'{platform} **\u27A4** {username}',
+                                                       description=f'**[{platform}] \u27A4** {username}',
                                                        color=discord.Colour.gold()))
                     return
             error = await ctx.send(embed=discord.Embed(title='Error: invalid platform'))
@@ -69,7 +69,7 @@ class Profile(commands.Cog):
                         username = user_data['profile']['aliases'][platform.lower()]
                         if username is None:
                             username = 'N/A'
-                        await ctx.send(embed=discord.Embed(title=f'{platform} **=** {username}',
+                        await ctx.send(embed=discord.Embed(title=f'**[{platform}] =** {username}',
                                                            color=discord.Colour.gold()))
                         return
             error = await ctx.send(embed=discord.Embed(title='Error: invalid platform'))
@@ -110,7 +110,7 @@ class Profile(commands.Cog):
                     self.server_db.find_one_and_update({'_id': str(ctx.author.id)},
                                                        {'$set': {f'profile.aliases.{platform.lower()}': None}})
                     await ctx.send(embed=discord.Embed(title='Successfully changed Profile',
-                                                       description=f'{platform} **\u27A4** None',
+                                                       description=f'**[{platform}] \u27A4** N/A',
                                                        color=discord.Colour.gold()))
                     return
                 error = await ctx.send(embed=discord.Embed(title='Error: invalid platform'))
