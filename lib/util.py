@@ -1,9 +1,14 @@
 import os
 import json
 import discord
+from lib.mongo import Mongo
 
 
 class Util:
+    def __init__(self):
+        self.db = Mongo.init_db(Mongo())
+        self.server_db = None
+    
     @staticmethod
     async def check_channel(ctx, bot_exclusive: bool = None):
         if os.path.isfile(f'config/{ctx.guild.id}/config.json'):
@@ -27,3 +32,10 @@ class Util:
             if ctx.channel.id in config['exp_channel_blacklist']:
                 return False
             return True
+
+    async def reset_flags(self, ctx):
+        self.server_db = self.db['server'][str(ctx.guild.id)]
+        reset_flags = {'flags': {'daily': True, 'thank': True}}
+        for member in ctx.guild.members:
+            if not member.bot:
+                self.server_db.find_one_and_update({"_id": str(member.id)}, {'$set': reset_flags})

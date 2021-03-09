@@ -5,7 +5,9 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 import discord
 from discord.ext import commands
 from master import Master
+from lib.util import Util
 from lib.mongo import Mongo
+from cogs.level import Level
 
 
 def get_prefix(bot, message):
@@ -30,17 +32,40 @@ schedule = AsyncIOScheduler()
 
 async def daily():
     """Daily Reset Timer"""
-    print('Daily Reset')
+    for guild in bot.guilds:
+        if os.path.isfile(f'config/{str(guild.id)}/config.json'):
+            with open(f'config/{str(guild.id)}/config.json', 'r') as f:
+                config = json.load(f)
+                config_channel = config['config_channel']
+        # Daily Reset Functions Here
+        await Util.reset_flags(Util(), config_channel)
+        if config_channel:
+            await config_channel.send(embed=discord.Embed(title=f'{config_channel.guild.name} Daily Reset!'))
 
 
 async def weekly():
     """Weekly reset timer"""
-    print('Weekly Reset')
+    for guild in bot.guilds:
+        if os.path.isfile(f'config/{str(guild.id)}/config.json'):
+            with open(f'config/{str(guild.id)}/config.json', 'r') as f:
+                config = json.load(f)
+                config_channel = config['config_channel']
+        # Weekly Reset Functions Here
+        if config_channel:
+            await config_channel.send(embed=discord.Embed(title=f'{config_channel.guild.name} Weekly Reset!'))
 
 
 async def monthly():
     """Monthly reset timer"""
-    print('Monthly Reset')
+    for guild in bot.guilds:
+        if os.path.isfile(f'config/{str(guild.id)}/config.json'):
+            with open(f'config/{str(guild.id)}/config.json', 'r') as f:
+                config = json.load(f)
+                config_channel = config['config_channel']
+        # Monthly Reset Functions Here
+        await Level.build_level(Level(bot), config_channel)
+        if config_channel:
+            await config_channel.send(embed=discord.Embed(title=f'{config_channel.guild.name} Monthly Reset!'))
 
 
 @bot.event
@@ -56,7 +81,7 @@ async def on_member_leave(member):
     with open(f'config/{str(member.guild.id)}/config.json', 'r') as f:
         config = json.load(f)
     config_channel = bot.get_channel(int(config['config_channel']))
-    Mongo.init_db(Mongo(Mongo(bot)))['server'][str(member.guild.id)].find_one_and_delete({'_id': str(member.id)})
+    Mongo.init_db(Mongo())['server'][str(member.guild.id)].find_one_and_delete({'_id': str(member.id)})
     config_channel.send(embed=discord.Embed(title=f'{member.displayname} left'))
 
 

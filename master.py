@@ -1,6 +1,7 @@
 import asyncio
 import discord
 from discord.ext import commands
+from lib.util import Util
 from lib.mongo import Mongo
 from cogs.level import Level
 from cogs.profile import Profile
@@ -10,7 +11,7 @@ from cogs.thank import Thank
 class Master(commands.Cog, name='Master'):
     def __init__(self, bot):
         self.bot = bot
-        self.db = Mongo.init_db(Mongo(self.bot))
+        self.db = Mongo.init_db(Mongo())
         self.server_db = None
 
     @commands.command(name='ping', hidden=True)
@@ -62,24 +63,25 @@ class Master(commands.Cog, name='Master'):
     @commands.has_guild_permissions(administrator=True)
     async def build_db(self, ctx, member: discord.Member = None):
         """Rebuilds specified user's database doc (Rebuilds entire server if no user specified!)"""
-        pending = await ctx.send(embed=discord.Embed(title='Rebuilding Database...'))
-        if member is None:
-            self.db['server'].drop_collection(str(ctx.guild.id))
-            self.db['server'].create_collection(str(ctx.guild.id))
-        else:
-            self.db['server'][str(ctx.guild.id)].find_one_and_delete({'_id': member.id})
-        await pending.edit(embed=discord.Embed(title='Rebuilding Levels...'))
-        await Level.build_level(Level(self.bot), ctx, member)
-        await pending.edit(embed=discord.Embed(title='Rebuilding Profiles...'))
-        await Profile.build_profile(Profile(self.bot), ctx, member)
-        await pending.edit(embed=discord.Embed(title='Rebuilding Thanks...'))
-        await Thank.build_thank(Thank(self.bot), ctx, member)
-        if member is None:
-            await pending.edit(embed=discord.Embed(title='Server Rebuild Complete',
-                                                   description=f'Server ID: {str(ctx.guild.id)}'))
-        else:
-            await pending.edit(embed=discord.Embed(title='User Rebuild Complete',
-                                                   description=f'User ID: {str(member.id)}'))
+        if await Util.check_channel(ctx, True):
+            pending = await ctx.send(embed=discord.Embed(title='Rebuilding Database...'))
+            if member is None:
+                self.db['server'].drop_collection(str(ctx.guild.id))
+                self.db['server'].create_collection(str(ctx.guild.id))
+            else:
+                self.db['server'][str(ctx.guild.id)].find_one_and_delete({'_id': member.id})
+            await pending.edit(embed=discord.Embed(title='Rebuilding Level stats...'))
+            await Level.build_level(Level(self.bot), ctx, member)
+            await pending.edit(embed=discord.Embed(title='Rebuilding Profile stats...'))
+            await Profile.build_profile(Profile(self.bot), ctx, member)
+            await pending.edit(embed=discord.Embed(title='Rebuilding Thank stats...'))
+            await Thank.build_thank(Thank(self.bot), ctx, member)
+            if member is None:
+                await pending.edit(embed=discord.Embed(title='Server Rebuild Complete',
+                                                       description=f'Server ID: {str(ctx.guild.id)}'))
+            else:
+                await pending.edit(embed=discord.Embed(title='User Rebuild Complete',
+                                                       description=f'User ID: {str(member.id)}'))
 
 
 def setup(bot):

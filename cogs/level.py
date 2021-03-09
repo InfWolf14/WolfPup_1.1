@@ -11,7 +11,7 @@ from pymongo import ReturnDocument
 class Level(commands.Cog, name='Level'):
     def __init__(self, bot):
         self.bot = bot
-        self.db = Mongo.init_db(Mongo(self.bot))
+        self.db = Mongo.init_db(Mongo())
         self.server_db = None
 
     @commands.command(name='build_level', hidden=True, aliases=['rebuild_level'])

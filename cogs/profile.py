@@ -8,7 +8,7 @@ from lib.mongo import Mongo
 class Profile(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.db = Mongo.init_db(Mongo(self.bot))
+        self.db = Mongo.init_db(Mongo())
         self.server_db = None
         self.sys_aliases = {'PS': {'PS', 'PSN', 'PS4', 'PS5', 'PLAYSTATION'},
                             'XB': {'XB', 'XB1', 'XBOX', 'MICROSOFT'},
