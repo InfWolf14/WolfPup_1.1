@@ -30,7 +30,6 @@ class Leaderboard(commands.Cog):
                         leaderboard = stat
                     else:
                         continue
-                print('running')
                 users = self.server_db.find().sort(stat, -1)
                 rank = 1
                 listing, list_user, f_name, user_str = '', '', '', ''
