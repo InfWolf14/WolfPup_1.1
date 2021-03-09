@@ -85,19 +85,19 @@ async def on_member_leave(member):
     config_channel.send(embed=discord.Embed(title=f'{member.displayname} left'))
 
 
-@bot.event
-async def on_command_error(ctx, error):
-    error = error.__cause__ or error
-    try:
-        await ctx.message.delete()
-    except discord.errors.NotFound:
-        pass
-    new_embed = discord.Embed(title=f'**[Error]** : {type(error).__name__}',
-                              description=f'{error}')
-    new_embed.set_footer(text=f'Use: [ {ctx.prefix}help ] for assistance')
-    error = await ctx.send(embed=new_embed)
-    await asyncio.sleep(5)
-    await error.delete()
+#@bot.event
+#async def on_command_error(ctx, error):
+#    error = error.__cause__ or error
+#    try:
+#        await ctx.message.delete()
+#    except discord.errors.NotFound:
+#        pass
+#    new_embed = discord.Embed(title=f'**[Error]** : {type(error).__name__}',
+#                              description=f'{error}')
+#    new_embed.set_footer(text=f'Use: [ {ctx.prefix}help ] for assistance')
+#    error = await ctx.send(embed=new_embed)
+#    await asyncio.sleep(5)
+#    await error.delete()
 
 
 @bot.event

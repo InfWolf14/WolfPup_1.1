@@ -1,8 +1,11 @@
+import io
 import asyncio
 import discord
+from discord import File
 from discord.ext import commands
 from lib.util import Util
 from lib.mongo import Mongo
+from PIL import Image, ImageDraw, ImageFont
 
 
 class Profile(commands.Cog):
@@ -124,9 +127,66 @@ class Profile(commands.Cog):
         """Displays your profile card."""
         self.server_db = self.db['server'][str(ctx.guild.id)]
         if await Util.check_channel(ctx):
-            return
+            sys_alias = {'PS': "assets/icon/ps_logo.png",
+                         'XB': "assets/icon/xb_logo.png",
+                         'STEAM': "assets/icon/steam_logo.png",
+                         'UPLAY': "assets/icon/ubi_logo.png",
+                         'FFXIV': "assets/icon/xiv_logo.png"}
+            if member is None:
+                member = ctx.author
+            async with ctx.message.channel.typing():
+                user = self.server_db.find_one({'_id': str(member.id)})
+                bg_img = Image.open('assets/card_to_draw.png').convert('RGBA')
+                ref_img = bg_img.copy()
+                draw = ImageDraw.Draw(ref_img)
+                title_font = ImageFont.truetype('assets/font/NASHVILL.ttf', 42)
+                buffer = 20
+                draw_bounds = [buffer, (ref_img.width-buffer), buffer, (ref_img.height-buffer)]
+                # # Initialize Coords # #
+                ref_coord = [draw_bounds[0], draw_bounds[2]]
+                # # Title Draw # #
+                text_size = draw.textsize(text='WANTED', font=title_font)
+                draw.text((int((ref_img.width/2)-(text_size[0]/2)), ref_coord[1]),
+                          text='WANTED', fill=(16, 16, 16), font=title_font)
+                draw.line((ref_coord[0], ref_coord[1]+(text_size[1]/2),
+                           (ref_img.width/2)-(text_size[0]/2+buffer), ref_coord[1]+(text_size[1]/2)),
+                          fill=(16, 16, 16), width=5)
+                draw.line(((ref_img.width/2)+(text_size[0]/2+buffer), ref_coord[1]+(text_size[1]/2),
+                           draw_bounds[1], ref_coord[1]+(text_size[1]/2)),
+                          fill=(16, 16, 16), width=5)
+                draw.line((draw_bounds[0]+(buffer*2), ref_coord[1]+(text_size[1]+(buffer/2)),
+                           draw_bounds[1]-(buffer*2), ref_coord[1]+(text_size[1]+(buffer/2))),
+                          fill=(16, 16, 16), width=5)
+                # # Advance Coords # #
+                ref_coord[0] += int(buffer/2)
+                ref_coord[1] += int(text_size[1]+(buffer*1.5))
+                # # Avatar Draw # #
+                avatar_img = Image.open('assets/gigi_avatar.png')
+                if member.avatar:
+                    avatar_asset = member.avatar_url_as(format='png', size=128)
+                    buffer_img = io.BytesIO()
+                    await avatar_asset.save(buffer_img)
+                    buffer_img.seek(0)
+                    avatar_img = Image.open(buffer_img).resize((128, 128)).convert('RGBA')
+                emblem_img = Image.open(f'assets/emblem_{user["level"]}.png').convert('RGBA')
+                draw.rectangle((ref_coord[0]-5, ref_coord[1]-5,
+                                ref_coord[0]+avatar_img.width+5, ref_coord[1]+avatar_img.height+5),
+                               fill=(16, 16, 16), width=5)
+                ref_img.paste(avatar_img, (ref_coord[0], ref_coord[1]), avatar_img)
+                ref_img.paste(emblem_img, (int(ref_coord[0]+(avatar_img.width/2)-(emblem_img.width/2)),
+                                           int(ref_coord[1]+avatar_img.height+1)), emblem_img)
+                # # Advance Coords # #
+                ref_coord[0] += avatar_img.width+(buffer/2)
+                ref_coord[1] += (buffer/2)
+                # # Draw Level|EXP # #
 
-    @commands.command()
+                # Send finished image
+                send_buffer = io.BytesIO()
+                ref_img.save(send_buffer, format='PNG')
+                send_buffer.seek(0)
+                await ctx.send(file=File(send_buffer, 'myimage.png'))
+
+    @commands.command(name='wanted')
     async def wanted(self, ctx, *text):
         """Sets the custom wanted text on your profile card. """
         self.server_db = self.db['server'][str(ctx.guild.id)]
