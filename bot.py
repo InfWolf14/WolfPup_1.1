@@ -37,9 +37,13 @@ async def daily():
             with open(f'config/{str(guild.id)}/config.json', 'r') as f:
                 config = json.load(f)
                 config_channel = config['config_channel']
-        # Daily Reset Functions Here
-        await Util.reset_flags(Util(), config_channel)
         if config_channel:
+            try:
+                config_channel = await bot.fetch_channel(config_channel)
+            except discord.errors.NotFound:
+                return
+            # Daily Reset Functions Here
+            await Util.reset_flags(Util(), config_channel)
             await config_channel.send(embed=discord.Embed(title=f'{config_channel.guild.name} Daily Reset!'))
 
 
@@ -85,25 +89,26 @@ async def on_member_leave(member):
     config_channel.send(embed=discord.Embed(title=f'{member.displayname} left'))
 
 
-#@bot.event
-#async def on_command_error(ctx, error):
-#    error = error.__cause__ or error
-#    try:
-#        await ctx.message.delete()
-#    except discord.errors.NotFound:
-#        pass
-#    new_embed = discord.Embed(title=f'**[Error]** : {type(error).__name__}',
-#                              description=f'{error}')
-#    new_embed.set_footer(text=f'Use: [ {ctx.prefix}help ] for assistance')
-#    error = await ctx.send(embed=new_embed)
-#    await asyncio.sleep(5)
-#    await error.delete()
+@bot.event
+async def on_command_error(ctx, error):
+    error = error.__cause__ or error
+    try:
+        await ctx.message.delete()
+    except discord.errors.NotFound:
+        pass
+    new_embed = discord.Embed(title=f'**[Error]** : {type(error).__name__}',
+                              description=f'{error}')
+    new_embed.set_footer(text=f'Use: [ {ctx.prefix}help ] for assistance')
+    error = await ctx.send(embed=new_embed)
+    await asyncio.sleep(5)
+    await error.delete()
 
 
 @bot.event
 async def on_ready():
     print(f'\nLogged in as: {bot.user.name} - {bot.user.id}\nVersion: {discord.__version__}')
     print(f'Successfully logged in and booted...!')
+    schedule.add_job(daily, 'cron', minute='*')
     schedule.add_job(daily, 'cron', day='*', hour=18)
     schedule.add_job(weekly, 'cron', week='*', day_of_week='sun', hour=6)
     schedule.add_job(monthly, 'cron', month='*', day='1')
