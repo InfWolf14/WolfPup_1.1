@@ -48,6 +48,8 @@ class Profile(commands.Cog):
         if await Util.check_channel(ctx, True):
             for platform in self.sys_aliases:
                 if system.lower() in self.sys_aliases[platform]:
+                    if len(username) > 32:
+                        await ctx.send(embed=discord.Embed(title='**[Error]** : Usernames must be 32 characters or less'))
                     self.server_db.find_one_and_update({'_id': str(ctx.author.id)},
                                                        {'$set': {f'profile.aliases.{platform}': username}})
                     await ctx.send(embed=discord.Embed(title='Successfully Updated Profile',
@@ -243,6 +245,9 @@ class Profile(commands.Cog):
         wanted = ' '.join(text)
         if await Util.check_channel(ctx, True):
             if len(wanted) != 0:
+                if len(wanted) > 50:
+                    await ctx.send(embed=discord.Embed(title='**[Error]** : Wanted Text must be 50 characters or less'))
+                    return
                 self.server_db.find_one_and_update({'_id': str(ctx.author.id)}, {'$set': {f'profile.wanted_text': wanted}})
                 await ctx.send(embed=discord.Embed(title='Successfully Updated Wanted Text:',
                                                    description=f'*{wanted}*'))
