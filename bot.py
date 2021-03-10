@@ -54,8 +54,12 @@ async def weekly():
             with open(f'config/{str(guild.id)}/config.json', 'r') as f:
                 config = json.load(f)
                 config_channel = config['config_channel']
-        # Weekly Reset Functions Here
         if config_channel:
+            try:
+                config_channel = await bot.fetch_channel(config_channel)
+            except discord.errors.NotFound:
+                return
+            # Weekly Reset Functions Here
             await config_channel.send(embed=discord.Embed(title=f'{config_channel.guild.name} Weekly Reset!'))
 
 
@@ -66,9 +70,13 @@ async def monthly():
             with open(f'config/{str(guild.id)}/config.json', 'r') as f:
                 config = json.load(f)
                 config_channel = config['config_channel']
-        # Monthly Reset Functions Here
-        await Level.build_level(Level(bot), config_channel)
         if config_channel:
+            try:
+                config_channel = await bot.fetch_channel(config_channel)
+            except discord.errors.NotFound:
+                return
+            # Monthly Reset Functions Here
+            await Level.build_level(Level(bot), config_channel)
             await config_channel.send(embed=discord.Embed(title=f'{config_channel.guild.name} Monthly Reset!'))
 
 
@@ -108,7 +116,6 @@ async def on_command_error(ctx, error):
 async def on_ready():
     print(f'\nLogged in as: {bot.user.name} - {bot.user.id}\nVersion: {discord.__version__}')
     print(f'Successfully logged in and booted...!')
-    schedule.add_job(daily, 'cron', minute='*')
     schedule.add_job(daily, 'cron', day='*', hour=18)
     schedule.add_job(weekly, 'cron', week='*', day_of_week='sun', hour=6)
     schedule.add_job(monthly, 'cron', month='*', day='1')

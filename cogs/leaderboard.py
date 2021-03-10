@@ -42,10 +42,10 @@ class Leaderboard(commands.Cog):
                         pass
                     if stat_2 is not None:
                         f_name = f'**{stat_2.capitalize().replace("_", " ")}**'
-                        user_str = f'`[{str(rank)}.]` *{list_user.name} :* {user[stat_1][stat_2]}'
+                        user_str = f'`[{str(rank)}.]` *{list_user.name} :* **{user[stat_1][stat_2]}**'
                     else:
                         f_name = f'**{stat.capitalize()}**'
-                        user_str = f'`[{str(rank)}.]` *{list_user.name} :* {user[stat]}'
+                        user_str = f'`[{str(rank)}.]` *{list_user.name} :* **{user[stat]}**'
                     if list_user == ctx.author:
                         my_stat = user_str
                         user_str = f'**\u27A4** {user_str} '
