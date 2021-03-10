@@ -120,9 +120,9 @@ class Profile(commands.Cog):
                                                        description=f'**[{platform.upper()}] \u27A4** *N/A*',
                                                        color=discord.Colour.gold()))
                     return
-                error = await ctx.send(embed=discord.Embed(title='Error: invalid platform'))
-                await asyncio.sleep(5)
-                await error.delete()
+            error = await ctx.send(embed=discord.Embed(title='Error: invalid platform'))
+            await asyncio.sleep(5)
+            await error.delete()
 
     @commands.command(aliases=['card', 'profilecard', 'canvas'])
     async def profile(self, ctx, member: discord.Member = None):
