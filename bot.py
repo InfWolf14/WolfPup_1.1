@@ -20,7 +20,8 @@ def get_prefix(bot, message):
     return commands.when_mentioned_or(*prefixes)(bot, message)
 
 
-initial_cogs = ['master', 'cogs.level', 'cogs.profile', 'cogs.thank', 'cogs.leaderboard']
+initial_cogs = ['master', 'cogs.mod', 'cogs.role', 'cogs.welcome',
+                'cogs.level', 'cogs.profile', 'cogs.thank', 'cogs.leaderboard']
 intents = discord.Intents.default()
 intents.members = True
 bot = commands.Bot(command_prefix=get_prefix, description='A bot designed for GoldxGuns', intents=intents)

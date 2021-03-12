@@ -1,6 +1,7 @@
 import discord
 from discord.ext import commands
 import datetime as dt
+from lib.util import Util
 
 
 class Mod(commands.Cog):
@@ -11,49 +12,54 @@ class Mod(commands.Cog):
     @commands.guild_only()
     async def joined(self, ctx, *, member: discord.Member = None):
         """Says when a member joined."""
-        if member is None:
-            member = ctx.author
-        await ctx.send(f'{member.display_name} joined on {member.joined_at}')
+        if await Util.check_channel(ctx, True):
+            if member is None:
+                member = ctx.author
+            await ctx.send(f'{member.display_name} joined on {member.joined_at}')
 
     @commands.command(name='top_role', aliases=['toprole'])
     @commands.guild_only()
     async def show_toprole(self, ctx, *, member: discord.Member = None):
         """Simple command which shows the members Top Role."""
-        if member is None:
-            member = ctx.author
-        await ctx.send(f'The top role for {member.display_name} is {member.top_role.name}')
+        if await Util.check_channel(ctx, True):
+            if member is None:
+                member = ctx.author
+            await ctx.send(f'The top role for {member.display_name} is {member.top_role.name}')
 
-    @commands.command(name='perms', aliases=['perms_for', 'permissions'])
+    @commands.command(name='perms', aliases=['check_perms', 'perms', 'permissions'])
     @commands.guild_only()
     async def check_permissions(self, ctx, *, member: discord.Member = None):
         """A simple command which checks a members Guild Permissions.
         If member is not provided, the author will be checked."""
-        if not member:
-            member = ctx.author
-        perms = '\n'.join(perm for perm, value in member.guild_permissions if value)
-        embed = discord.Embed(title='Permissions for:', description=ctx.guild.name, colour=member.colour)
-        embed.set_author(icon_url=member.avatar_url, name=str(member))
-        embed.add_field(name='\uFEFF', value=perms)
-        await ctx.send(content=None, embed=embed)
+        if await Util.check_channel(ctx, True):
+            if not member:
+                member = ctx.author
+            perms = '\n'.join(perm for perm, value in member.guild_permissions if value)
+            embed = discord.Embed(title='Permissions for:', description=ctx.guild.name, colour=member.colour)
+            embed.set_author(icon_url=member.avatar_url, name=str(member))
+            embed.add_field(name='\uFEFF', value=perms)
+            await ctx.send(content=None, embed=embed)
 
     @commands.command(hidden=True)
     @commands.guild_only()
     async def check(self, ctx, member: discord.Member = None):
-        if member is None:
-            member = ctx.author
-        embed = discord.Embed(title=f"{member.name}'s Profile", value="Check this out")
-        embed.add_field(name="Joined at", value=f"{dt.datetime.strftime(member.joined_at, '%d %B, %Y  %H:%M')}")
-        embed.add_field(name="Created at", value=f"{dt.datetime.strftime(member.created_at, '%d %B, %Y  %H:%M')}")
-        embed.add_field(name="Username", value=f"{member.name}{member.discriminator}")
-        embed.add_field(name="Top role:", value=f"{member.top_role}")
-        embed.set_thumbnail(url=member.avatar_url)
-        await ctx.send(embed=embed)
+        if await Util.check_channel(ctx, True):
+            if member is None:
+                member = ctx.author
+            embed = discord.Embed(title=f"{member.name}'s Profile", value="Check this out")
+            embed.add_field(name="Joined at", value=f"{dt.datetime.strftime(member.joined_at, '%d %B, %Y  %H:%M')}")
+            embed.add_field(name="Created at", value=f"{dt.datetime.strftime(member.created_at, '%d %B, %Y  %H:%M')}")
+            embed.add_field(name="Username", value=f"{member.name}{member.discriminator}")
+            embed.add_field(name="Top role:", value=f"{member.top_role}")
+            embed.set_thumbnail(url=member.avatar_url)
+            await ctx.send(embed=embed)
 
     @commands.command(hidden=True)
     @commands.guild_only()
     async def role_number(self, ctx, *query: discord.Role):
-        for i, role in enumerate(query):
-            await ctx.send(embed=discord.Embed(title=f'__{str(len(role.members))}__ users in {role.name}'))
+        if await Util.check_channel(ctx, True):
+            for i, role in enumerate(query):
+                await ctx.send(embed=discord.Embed(title=f'__{str(len(role.members))}__ users in {role.name}'))
 
 
 def setup(bot):
