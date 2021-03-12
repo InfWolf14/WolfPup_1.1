@@ -2,6 +2,7 @@
   "prefix": "w^",
   "channel_config": {
     "config_channel": 742534075583037540,
+    "modlog_channel": 742534075583037540,
     "rolepost_channel": 742534075583037540,
     "welcome_channel": 742389034420142090,
     "bot_channels":  [742534075583037540]
