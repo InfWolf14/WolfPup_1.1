@@ -1,6 +1,10 @@
 {
   "prefix": "w^",
-  "config_channel": 742534075583037540,
-  "exp_channel_blacklist":  [742534075583037540],
-  "bot_channels":  [742534075583037540]
+  "channel_config": {
+    "config_channel": 742534075583037540,
+    "rolepost_channel": 742534075583037540,
+    "welcome_channel": 742389034420142090,
+    "bot_channels":  [742534075583037540]
+  },
+  "exp_channel_blacklist":  [742534075583037540]
 }

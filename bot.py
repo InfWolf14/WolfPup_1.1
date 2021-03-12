@@ -36,7 +36,7 @@ async def daily():
         if os.path.isfile(f'config/{str(guild.id)}/config.json'):
             with open(f'config/{str(guild.id)}/config.json', 'r') as f:
                 config = json.load(f)
-                config_channel = config['config_channel']
+                config_channel = config['channel_config']['config_channel']
         if config_channel:
             try:
                 config_channel = await bot.fetch_channel(config_channel)
@@ -53,7 +53,7 @@ async def weekly():
         if os.path.isfile(f'config/{str(guild.id)}/config.json'):
             with open(f'config/{str(guild.id)}/config.json', 'r') as f:
                 config = json.load(f)
-                config_channel = config['config_channel']
+                config_channel = config['channel_config']['config_channel']
         if config_channel:
             try:
                 config_channel = await bot.fetch_channel(config_channel)
@@ -69,7 +69,7 @@ async def monthly():
         if os.path.isfile(f'config/{str(guild.id)}/config.json'):
             with open(f'config/{str(guild.id)}/config.json', 'r') as f:
                 config = json.load(f)
-                config_channel = config['config_channel']
+                config_channel = config['channel_config']['config_channel']
         if config_channel:
             try:
                 config_channel = await bot.fetch_channel(config_channel)
