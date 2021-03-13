@@ -1,3 +1,4 @@
+import json
 import discord
 from discord.ext import commands
 import datetime as dt
@@ -26,7 +27,7 @@ class Mod(commands.Cog):
                 member = ctx.author
             await ctx.send(f'The top role for {member.display_name} is {member.top_role.name}')
 
-    @commands.command(name='perms', aliases=['check_perms', 'perms', 'permissions'])
+    @commands.command(name='perms', aliases=['check_perms'])
     @commands.guild_only()
     async def check_permissions(self, ctx, *, member: discord.Member = None):
         """A simple command which checks a members Guild Permissions.
@@ -63,54 +64,61 @@ class Mod(commands.Cog):
 
     @commands.Cog.listener()
     async def on_raw_message_delete(self, payload):
-        with open(f'config/{payload.guild_id}/config.json', 'r') as f:
-            config = json.load(f)
-        modlog_channel = self.bot.get_channel(config['channel_config']['modlog_channel'])
-        if not payload.cached_message:
-            deleted_channel = self.bot.get_channel(payload.channel_id)
-            message_id = payload.message_id
-            embed = discord.Embed(title='Message Deleted', description='Was not in internal cache. Cannot fetch '
-                                                                       'context.')
-            embed.add_field(name='Deleted in:', value=deleted_channel.mention)
-            embed.add_field(name='Message ID', value=message_id)
-            await modlog_channel.send(embed=embed)
-        elif payload.cached_message:
-            message = payload.cached_message
-            embed = discord.Embed(title='Message Deleted')
-            embed.add_field(name='Message Author:', value=message.author.mention)
-            embed.add_field(name='Channel:', value=message.channel.mention)
-            embed.add_field(name='Message Content:', value=message.content)
-            embed.set_footer(text=f'Author ID: {message.author.id} | Message ID: {message.id}')
-            embed.set_thumbnail(url=message.author.avatar_url)
-            await modlog_channel.send(embed=embed)
+        try:
+            with open(f'config/{payload.guild_id}/config.json', 'r') as f:
+                config = json.load(f)
+            modlog_channel = self.bot.get_channel(config['channel_config']['modlog_channel'])
+            if not payload.cached_message:
+                deleted_channel = self.bot.get_channel(payload.channel_id)
+                message_id = payload.message_id
+                embed = discord.Embed(title='Message Deleted', description='Was not in internal cache. Cannot fetch '
+                                                                           'context.')
+                embed.add_field(name='Deleted in:', value=deleted_channel.mention)
+                embed.add_field(name='Message ID', value=message_id)
+                await modlog_channel.send(embed=embed)
+                return
+            elif payload.cached_message:
+                message = payload.cached_message
+                embed = discord.Embed(title='Message Deleted')
+                embed.add_field(name='Message Author:', value=message.author.mention)
+                embed.add_field(name='Channel:', value=message.channel.mention)
+                embed.add_field(name='Message Content:', value=message.content)
+                embed.set_footer(text=f'Author ID: {message.author.id} | Message ID: {message.id}')
+                embed.set_thumbnail(url=message.author.avatar_url)
+                await modlog_channel.send(embed=embed)
+        except AttributeError or discord.errors.HTTPException:
+            return
 
     @commands.Cog.listener()
     async def on_raw_message_edit(self, payload):
-        edited_channel = self.bot.get_channel(payload.channel_id)
-        with open(f'config/{payload.guild_id}/config.json', 'r') as f:
-            config = json.load(f)
-        modlog_channel = self.bot.get_channel(config['channel_config']['modlog_channel'])
-        edited_channel = self.bot.get_channel(payload.channel_id)
-        edited_message = await edited_channel.fetch_message(payload.message_id)
-        if edited_message.author.bot:
+        try:
+            with open(f'config/{payload.guild_id}/config.json', 'r') as f:
+                config = json.load(f)
+            modlog_channel = self.bot.get_channel(config['channel_config']['modlog_channel'])
+            edited_channel = self.bot.get_channel(payload.channel_id)
+            edited_message = await edited_channel.fetch_message(payload.message_id)
+            if edited_message.author.bot:
+                return
+            data = payload.data
+            if not payload.cached_message:
+                embed = discord.Embed(title='Message Edited. **Not in Internal Cache.**',
+                                      description=f'[Jump to message]({edited_message.jump_url})')
+                embed.add_field(name='Channel:', value=edited_channel.mention)
+                embed.add_field(name='Message Author', value=edited_message.author.mention)
+                embed.add_field(name='Edited Message', value=data['content'])
+                await modlog_channel.send(embed=embed)
+                return
+            if payload.cached_message:
+                embed = discord.Embed(title='Message Edited', description=f'[Jump to message]({edited_message.jump_url})')
+                embed.add_field(name='Channel:', value=edited_channel.mention)
+                embed.add_field(name='User:', value=edited_message.author.mention)
+                embed.add_field(name='Message Before:', value=payload.cached_message.content)
+                embed.add_field(name='Message After:', value=data['content'])
+                embed.set_footer(text=f'User ID: {edited_message.author.id}')
+                embed.set_thumbnail(url=edited_message.author.avatar_url)
+                await modlog_channel.send(embed=embed)
+        except AttributeError or discord.errors.HTTPException:
             return
-        data = payload.data
-        if not payload.cached_message:
-            embed = discord.Embed(title='Message Edited. **Not in Internal Cache.**',
-                                  description=f'[Jump to message]({edited_message.jump_url})')
-            embed.add_field(name='Channel:', value=edited_channel.mention)
-            embed.add_field(name='Message Author', value=edited_message.author.mention)
-            embed.add_field(name='Edited Message', value=data['content'])
-            await modlog_channel.send(embed=embed)
-        if payload.cached_message:
-            embed = discord.Embed(title='Message Edited', description=f'[Jump to message]({edited_message.jump_url})')
-            embed.add_field(name='Channel:', value=edited_channel.mention)
-            embed.add_field(name='User:', value=edited_message.author.mention)
-            embed.add_field(name='Message Before:', value=payload.cached_message.content)
-            embed.add_field(name='Message After:', value=data['content'])
-            embed.set_footer(text=f'User ID: {edited_message.author.id}')
-            embed.set_thumbnail(url=edited_message.author.avatar_url)
-            await modlog_channel.send(embed=embed)
 
 
 def setup(bot):

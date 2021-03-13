@@ -40,30 +40,45 @@ class Master(commands.Cog, name='Master'):
                                     '/shiinabat_by_erickiwi_de3oa60-pre.png?width=653&height=672')
         await ctx.send(embed=new_embed)
 
-    @commands.command(name="update", hidden=True, pass_context=True, aliases=['change', 'modify'])
+    @commands.command(name='change_prefix', hidden=True, aliases=['prefix'])
     @commands.is_owner()
-    async def update(self, ctx, setting: str, update: int):
+    async def change_prefix(self, ctx, prefix: str):
         """Administrator command"""
-        if os.path.isfile(f'config/{ctx.guild.id}/config.json'):
-            with open(f'config/{ctx.guild.id}/config.json', 'r') as f:
-                config = json.load(f)
-            try:
-                subfields = []
-                for field in config:
-                    while isinstance(config[field], dict):
-                        subfields.append(field)
-                        field = config[field]
-                    if len(subfields) > 0:
-                        config = config[f'{".".join(subfields)}']
-                    if field == setting:
-                        config[field] = update
-                        await ctx.send(embed=discord.Embed(title=f'{setting} has been changed.',
-                                                           description=f'Updated: {update}'))
-            except KeyError:
-                await ctx.send(embed=discord.Embed(title='**[Error]** : Setting not found'))
-                return
-            with open(f'config/{ctx.guild.id}/config.json', 'w') as f:
-                json.dump(config, f)
+        if await Util.check_channel(ctx, True):
+            if os.path.isfile(f'config/{ctx.guild.id}/config.json'):
+                with open(f'config/{ctx.guild.id}/config.json', 'r') as f:
+                    config = json.load(f)
+                if len(prefix) > 3:
+                    await ctx.send(embed=discord.Embed(title='Bot prefix must be 3 or less characters'))
+                    return
+                config['prefix'] = prefix
+                with open(f'config/{ctx.guild.id}/config.json', 'w') as f:
+                    json.dump(config, f)
+
+    @commands.command(name="channel_config", hidden=True)
+    @commands.is_owner()
+    async def channel_config(self, ctx, setting: str, update: str):
+        """Administrator command"""
+        if await Util.check_channel(ctx, True):
+            if os.path.isfile(f'config/{ctx.guild.id}/config.json'):
+                with open(f'config/{ctx.guild.id}/config.json', 'r') as f:
+                    config = json.load(f)
+                try:
+                    if isinstance(config['channel_config'][setting], list):
+                        if '?' in update:
+                            config['channel_config'][setting].remove(int(update.replace('?', '')))
+                            update = f'Removed {update.replace("?", "")}'
+                        else:
+                            config['channel_config'][setting].append(int(update))
+                    else:
+                        config['channel_config'][setting] = int(update)
+                    await ctx.send(embed=discord.Embed(title=f'Successfully updated \'{setting}\'',
+                                                       description=update))
+                except KeyError:
+                    await ctx.send(embed=discord.Embed(title=f'**[Error]** : \'{setting}\' not found'))
+                    return
+                with open(f'config/{ctx.guild.id}/config.json', 'w') as f:
+                    json.dump(config, f)
 
     @commands.command(name='load', hidden=True)
     @commands.is_owner()

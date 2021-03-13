@@ -29,7 +29,7 @@ class Util:
         if os.path.isfile(f'config/{ctx.guild.id}/config.json'):
             with open(f'config/{ctx.guild.id}/config.json', 'r') as f:
                 config = json.load(f)
-            if ctx.channel.id in config['exp_channel_blacklist']:
+            if ctx.channel.id in config['channel_config']['exp_channel_blacklist']:
                 return False
             return True
 
