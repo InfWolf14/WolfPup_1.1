@@ -22,7 +22,7 @@ class Profile(commands.Cog):
     @commands.command(name='build_profile', hidden=True, aliases=['rebuild_profile'])
     @commands.has_guild_permissions(administrator=True)
     async def build_profile(self, ctx, member: discord.Member = None, pending=None):
-        self.server_db = self.db['server'][str(ctx.guild.id)]
+        self.server_db = self.db[str(ctx.guild.id)]['user']
         if pending:
             await pending.edit(embed=discord.Embed(title='Rebuilding Profile stats...'))
         else:
@@ -44,7 +44,7 @@ class Profile(commands.Cog):
     async def set(self, ctx, system: str, *name: str):
         """Add your usernames for your game system"""
         username = ' '.join(name)
-        self.server_db = self.db['server'][str(ctx.guild.id)]
+        self.server_db = self.db[str(ctx.guild.id)]['users']
         if await Util.check_channel(ctx, True):
             for platform in self.sys_aliases:
                 if system.lower() in self.sys_aliases[platform]:
@@ -63,7 +63,7 @@ class Profile(commands.Cog):
     @commands.command(name='get')
     async def get(self, ctx, system: str, member: discord.Member = None):
         """Get a users usernames."""
-        self.server_db = self.db['server'][str(ctx.guild.id)]
+        self.server_db = self.db[str(ctx.guild.id)]['users']
         if await Util.check_channel(ctx):
             if member is None:
                 member = ctx.author
@@ -84,7 +84,7 @@ class Profile(commands.Cog):
     @commands.command(name='search')
     async def search(self, ctx, query, exact_match: bool = False):
         """Search for a user"""
-        self.server_db = self.db['server'][str(ctx.guild.id)]
+        self.server_db = self.db[str(ctx.guild.id)]['users']
         results = []
         count = 0
         if await Util.check_channel(ctx):
@@ -110,7 +110,7 @@ class Profile(commands.Cog):
     @commands.command(name='delete', aliases=['del'])
     async def delete(self, ctx, system):
         """Delete a username"""
-        self.server_db = self.db['server'][str(ctx.guild.id)]
+        self.server_db = self.db[str(ctx.guild.id)]['users']
         if await Util.check_channel(ctx, True):
             for platform in self.sys_aliases:
                 if system.lower() in self.sys_aliases[platform]:
@@ -127,7 +127,7 @@ class Profile(commands.Cog):
     @commands.command(aliases=['card', 'profilecard', 'canvas'])
     async def profile(self, ctx, member: discord.Member = None):
         """Displays your profile card."""
-        self.server_db = self.db['server'][str(ctx.guild.id)]
+        self.server_db = self.db[str(ctx.guild.id)]['users']
         print('\n')
         if await Util.check_channel(ctx):
             if member is None:
@@ -241,7 +241,7 @@ class Profile(commands.Cog):
     @commands.command(name='wanted')
     async def wanted(self, ctx, *text):
         """Sets the custom wanted text on your profile card. """
-        self.server_db = self.db['server'][str(ctx.guild.id)]
+        self.server_db = self.db[str(ctx.guild.id)]['users']
         wanted = ' '.join(text)
         if await Util.check_channel(ctx, True):
             if len(wanted) != 0:

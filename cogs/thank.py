@@ -15,7 +15,7 @@ class Thank(commands.Cog):
     @commands.command(name='build_thank', hidden=True, aliases=['rebuild_thank'])
     @commands.has_guild_permissions(administrator=True)
     async def build_thank(self, ctx, member: discord.Member = None, pending=None):
-        self.server_db = self.db['server'][str(ctx.guild.id)]
+        self.server_db = self.db[str(ctx.guild.id)]['users']
         if pending:
             await pending.edit(embed=discord.Embed(title='Rebuilding Thank stats...'))
         else:
@@ -34,7 +34,7 @@ class Thank(commands.Cog):
 
     @commands.command(name='thank', aliases=['thanks'])
     async def thank(self, ctx, member: discord.Member, *args):
-        self.server_db = self.db['server'][str(ctx.guild.id)]
+        self.server_db = self.db[str(ctx.guild.id)]['users']
         reason = 'For being such a great person!'
         if args:
             reason = ' '.join(args)
@@ -72,7 +72,7 @@ class Thank(commands.Cog):
 
     @commands.command(name='my_thanks')
     async def my_thanks(self, ctx):
-        self.server_db = self.db['server'][str(ctx.guild.id)]
+        self.server_db = self.db[str(ctx.guild.id)]['users']
         if await Util.check_channel(ctx, True):
             user = self.server_db.find_one({'_id': str(ctx.author.id)})
             new_embed = discord.Embed(title=f'{ctx.author.display_name}\'s Stats',

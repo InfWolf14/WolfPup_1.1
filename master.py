@@ -57,9 +57,9 @@ class Master(commands.Cog, name='Master'):
                 with open(f'config/{ctx.guild.id}/config.json', 'w') as f:
                     json.dump(config, f)
 
-    @commands.command(name="channel_config", hidden=True)
+    @commands.command(name="channel_config", hidden=True, aliases=['c_config'])
     @commands.is_owner()
-    async def channel_config(self, ctx, setting: str, update: str):
+    async def channel_config(self, ctx, setting: str, channel: discord.TextChannel):
         """Administrator command"""
         if os.path.isfile(f'config/{ctx.guild.id}/config.json'):
             with open(f'config/{ctx.guild.id}/config.json', 'r') as f:
@@ -67,17 +67,33 @@ class Master(commands.Cog, name='Master'):
             if ctx.channel.id == config['channel_config']['config_channel']:
                 try:
                     if isinstance(config['channel_config'][setting], list):
-                        if '?' in update:
-                            config['channel_config'][setting].remove(int(update.replace('?', '')))
-                            update = f'Removed {update.replace("?", "")}'
-                        else:
-                            config['channel_config'][setting].append(int(update))
+                        config['channel_config'][setting].append(channel.id)
+                        config['channel_config'][setting] = list(set(config['channel_config'][setting]))
                     else:
-                        config['channel_config'][setting] = int(update)
-                    await ctx.send(embed=discord.Embed(title=f'Successfully updated \'{setting}\'',
-                                                       description=update))
+                        config['channel_config'][setting] = int(channel.id)
+                    channel = await self.bot.fetch_channel(channel.id)
+                    await ctx.send(embed=discord.Embed(title=f'Successfully updated \'{setting}\' settings',
+                                                       description=f'**Name** : {channel.name}\n**ID** : {channel.id}'))
                 except KeyError:
-                    await ctx.send(embed=discord.Embed(title=f'**[Error]** : \'{setting}\' not found'))
+                    await ctx.send(embed=discord.Embed(title=f'**[Error]** : \'{setting}\' setting not found'))
+                    return
+                with open(f'config/{ctx.guild.id}/config.json', 'w') as f:
+                    json.dump(config, f)
+
+    @commands.command(name='role_config', hidden=True, aliases=['r_config'])
+    @commands.is_owner()
+    async def role_config(self, ctx, setting: str, role: discord.Role):
+        """Administrator command"""
+        if os.path.isfile(f'config/{ctx.guild.id}/config.json'):
+            with open(f'config/{ctx.guild.id}/config.json', 'r') as f:
+                config = json.load(f)
+            if ctx.channel.id == config['channel_config']['config_channel']:
+                try:
+                    config['role_config'][setting] = int(role.id)
+                    await ctx.send(embed=discord.Embed(title=f'Changed \'{setting}\' settings',
+                                                       description=f'**Name** : {role.name}\n**ID** : {role.id}'))
+                except KeyError:
+                    await ctx.send(embed=discord.Embed(title=f'**[Error]** : \'{setting}\' setting not found'))
                     return
                 with open(f'config/{ctx.guild.id}/config.json', 'w') as f:
                     json.dump(config, f)
@@ -169,9 +185,9 @@ class Master(commands.Cog, name='Master'):
                 else:
                     await discord.Message.add_reaction(ctx.message, '\U00002705')
 
-            @commands.command(name="build_db", hidden=True, aliases=['rebuild_db'])
+    @commands.command(name="build_db", hidden=True, aliases=['rebuild_user_db'])
     @commands.is_owner()
-    async def build_db(self, ctx, member: discord.Member = None):
+    async def build_user_db(self, ctx, member: discord.Member = None):
         """Administrator command."""
         if os.path.isfile(f'config/{ctx.guild.id}/config.json'):
             with open(f'config/{ctx.guild.id}/config.json', 'r') as f:
@@ -179,10 +195,10 @@ class Master(commands.Cog, name='Master'):
             if ctx.channel.id == config['channel_config']['config_channel']:
                 pending = await ctx.send(embed=discord.Embed(title='Rebuilding Database...'))
                 if member is None:
-                    self.db['server'].drop_collection(str(ctx.guild.id))
-                    self.db['server'].create_collection(str(ctx.guild.id))
+                    self.db[ctx.guild.id].drop_collection(str(ctx.guild.id))
+                    self.db[ctx.guild.id].create_collection(str(ctx.guild.id))
                 else:
-                    self.db['server'][str(ctx.guild.id)].find_one_and_delete({'_id': member.id})
+                    self.db[ctx.guild.id]['users'].find_one_and_delete({'_id': member.id})
                 pending = await Level.build_level(Level(self.bot), ctx, member, pending)
                 pending = await Profile.build_profile(Profile(self.bot), ctx, member, pending)
                 pending = await Thank.build_thank(Thank(self.bot), ctx, member, pending)

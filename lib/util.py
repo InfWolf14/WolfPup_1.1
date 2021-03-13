@@ -33,9 +33,20 @@ class Util:
                 return False
             return True
 
-    async def reset_flags(self, ctx):
-        self.server_db = self.db['server'][str(ctx.guild.id)]
+    async def reset_user_flags(self, ctx):
+        self.server_db = self.db[str(ctx.guild.id)]['users']
         reset_flags = {'flags': {'daily': True, 'thank': True}}
         for member in ctx.guild.members:
             if not member.bot:
                 self.server_db.find_one_and_update({"_id": str(member.id)}, {'$set': reset_flags})
+
+    async def reset_server_settings(self, ctx):
+        self.server_db = self.db[str(ctx.guild.id)]
+        self.server_db.drop_collection('config')
+        self.server_db.create_collection('config')
+
+    async def award_roles(self, ctx, roles: list):
+        return
+
+    async def remove_roles(self, ctx, roles: list):
+        return

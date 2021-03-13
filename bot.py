@@ -44,7 +44,7 @@ async def daily():
             except discord.errors.NotFound:
                 return
             # Daily Reset Functions Here
-            await Util.reset_flags(Util(), config_channel)
+            await Util.reset_user_flags(Util(), config_channel)
             await config_channel.send(embed=discord.Embed(title=f'{config_channel.guild.name} Daily Reset!'))
 
 

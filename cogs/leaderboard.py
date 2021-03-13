@@ -15,7 +15,7 @@ class Leaderboard(commands.Cog):
 
     @commands.command(name='leaderboard', aliases=['lb'])
     async def leaderboard(self, ctx, *args):
-        self.server_db = self.db['server'][str(ctx.guild.id)]
+        self.server_db = self.db[str(ctx.guild.id)]['users']
         leaderboard = None
         if args:
             leaderboard = ' '.join(args)

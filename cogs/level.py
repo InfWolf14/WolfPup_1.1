@@ -17,7 +17,7 @@ class Level(commands.Cog, name='Level'):
     @commands.command(name='build_level', hidden=True, aliases=['rebuild_level'])
     @commands.has_guild_permissions(administrator=True)
     async def build_level(self, ctx, member: discord.Member = None, pending=None):
-        self.server_db = self.db['server'][str(ctx.guild.id)]
+        self.server_db = self.db[str(ctx.guild.id)]['users']
         if pending:
             await pending.edit(embed=discord.Embed(title='Rebuilding Level stats...'))
         else:
@@ -61,7 +61,7 @@ class Level(commands.Cog, name='Level'):
         return floor(((sqrt(40 + xp)) / 110) + 1)
 
     async def update_experience(self, guild_id, user_id, amount: int = None):
-        self.server_db = self.db['server'][str(guild_id)]
+        self.server_db = self.db[str(guild_id)]['users']
         if amount is None:
             amount = random.randint(100, 150)
         user = self.server_db.find_one_and_update({'_id': str(user_id)}, {'$inc': {'exp': amount}},
@@ -73,7 +73,7 @@ class Level(commands.Cog, name='Level'):
     @commands.Cog.listener()
     async def on_message(self, message):
         if not message.author.bot and await Util.check_exp_blacklist(message):
-            self.server_db = self.db['server'][str(message.guild.id)]
+            self.server_db = self.db[str(message.guild.id)]['users']
             user = self.server_db.find_one({'_id': str(message.author.id)})
             try:
                 if (user['timestamp'] + dt.timedelta(seconds=45)) <= dt.datetime.utcnow():

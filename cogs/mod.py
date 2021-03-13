@@ -11,7 +11,7 @@ class Mod(commands.Cog):
 
     @commands.command()
     @commands.guild_only()
-    async def joined(self, ctx, *, member: discord.Member = None):
+    async def joined(self, ctx, member: discord.Member = None):
         """Says when a member joined."""
         if await Util.check_channel(ctx, True):
             if member is None:
@@ -20,7 +20,7 @@ class Mod(commands.Cog):
 
     @commands.command(name='top_role', aliases=['toprole'])
     @commands.guild_only()
-    async def show_toprole(self, ctx, *, member: discord.Member = None):
+    async def show_toprole(self, ctx, member: discord.Member = None):
         """Simple command which shows the members Top Role."""
         if await Util.check_channel(ctx, True):
             if member is None:
@@ -29,7 +29,7 @@ class Mod(commands.Cog):
 
     @commands.command(name='perms', aliases=['check_perms'])
     @commands.guild_only()
-    async def check_permissions(self, ctx, *, member: discord.Member = None):
+    async def check_permissions(self, ctx, member: discord.Member = None):
         """A simple command which checks a members Guild Permissions.
         If member is not provided, the author will be checked."""
         if await Util.check_channel(ctx, True):
