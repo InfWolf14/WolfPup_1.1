@@ -22,7 +22,7 @@ class Profile(commands.Cog):
     @commands.command(name='build_profile', hidden=True, aliases=['rebuild_profile'])
     @commands.has_guild_permissions(administrator=True)
     async def build_profile(self, ctx, member: discord.Member = None, pending=None):
-        self.server_db = self.db[str(ctx.guild.id)]['user']
+        self.server_db = self.db[str(ctx.guild.id)]['users']
         if pending:
             await pending.edit(embed=discord.Embed(title='Rebuilding Profile stats...'))
         else:

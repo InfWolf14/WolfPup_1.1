@@ -195,10 +195,9 @@ class Master(commands.Cog, name='Master'):
             if ctx.channel.id == config['channel_config']['config_channel']:
                 pending = await ctx.send(embed=discord.Embed(title='Rebuilding Database...'))
                 if member is None:
-                    self.db[ctx.guild.id].drop_collection(str(ctx.guild.id))
-                    self.db[ctx.guild.id].create_collection(str(ctx.guild.id))
+                    self.db[str(ctx.guild.id)].drop_collection('users')
                 else:
-                    self.db[ctx.guild.id]['users'].find_one_and_delete({'_id': member.id})
+                    self.db[str(ctx.guild.id)]['users'].find_one_and_delete({'_id': member.id})
                 pending = await Level.build_level(Level(self.bot), ctx, member, pending)
                 pending = await Profile.build_profile(Profile(self.bot), ctx, member, pending)
                 pending = await Thank.build_thank(Thank(self.bot), ctx, member, pending)

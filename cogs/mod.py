@@ -86,7 +86,7 @@ class Mod(commands.Cog):
                 embed.set_footer(text=f'Author ID: {message.author.id} | Message ID: {message.id}')
                 embed.set_thumbnail(url=message.author.avatar_url)
                 await modlog_channel.send(embed=embed)
-        except AttributeError or discord.errors.HTTPException:
+        except (AttributeError, discord.errors.HTTPException):
             return
 
     @commands.Cog.listener()
@@ -117,7 +117,7 @@ class Mod(commands.Cog):
                 embed.set_footer(text=f'User ID: {edited_message.author.id}')
                 embed.set_thumbnail(url=edited_message.author.avatar_url)
                 await modlog_channel.send(embed=embed)
-        except AttributeError or discord.errors.HTTPException:
+        except (AttributeError, discord.errors.HTTPException):
             return
 
 
