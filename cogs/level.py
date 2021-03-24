@@ -30,7 +30,6 @@ class Level(commands.Cog, name='Level'):
                 return
             for member in ctx.guild.members:
                 if not member.bot:
-                    new_level['exp'] = random.randint(200, 27150)
                     self.server_db.find_one_and_update({"_id": str(member.id)}, {'$set': new_level}, upsert=True)
             await pending.edit(embed=discord.Embed(title='Done'))
             return pending
@@ -38,6 +37,7 @@ class Level(commands.Cog, name='Level'):
     @commands.command(name='stats', pass_context=True)
     async def stats(self, ctx, member: discord.Member = None):
         """Returns a user's current profile level and experience"""
+        await ctx.message.delete()
         member = member or ctx.author
         if await Util.check_channel(ctx, True):
             await self.add_experience(ctx, member, 0)

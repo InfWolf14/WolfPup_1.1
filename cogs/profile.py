@@ -43,6 +43,7 @@ class Profile(commands.Cog):
     @commands.command(name='set', aliases=['add'])
     async def set(self, ctx, system: str, *name: str):
         """Add your usernames for your game system"""
+        await ctx.message.delete()
         username = ' '.join(name)
         self.server_db = self.db[str(ctx.guild.id)]['users']
         if await Util.check_channel(ctx, True):
@@ -63,6 +64,7 @@ class Profile(commands.Cog):
     @commands.command(name='get')
     async def get(self, ctx, system: str, member: discord.Member = None):
         """Get a users usernames."""
+        await ctx.message.delete()
         self.server_db = self.db[str(ctx.guild.id)]['users']
         if await Util.check_channel(ctx):
             if member is None:
@@ -84,6 +86,7 @@ class Profile(commands.Cog):
     @commands.command(name='search')
     async def search(self, ctx, query, exact_match: bool = False):
         """Search for a user"""
+        await ctx.message.delete()
         self.server_db = self.db[str(ctx.guild.id)]['users']
         results = []
         count = 0
@@ -110,6 +113,7 @@ class Profile(commands.Cog):
     @commands.command(name='delete', aliases=['del'])
     async def delete(self, ctx, system):
         """Delete a username"""
+        await ctx.message.delete()
         self.server_db = self.db[str(ctx.guild.id)]['users']
         if await Util.check_channel(ctx, True):
             for platform in self.sys_aliases:
@@ -236,11 +240,13 @@ class Profile(commands.Cog):
                 send_buffer = io.BytesIO()
                 ref_img.save(send_buffer, format='PNG')
                 send_buffer.seek(0)
+                await ctx.message.delete()
                 await ctx.send(file=File(send_buffer, 'myimage.png'))
 
     @commands.command(name='wanted')
     async def wanted(self, ctx, *text):
         """Sets the custom wanted text on your profile card. """
+        await ctx.message.delete()
         self.server_db = self.db[str(ctx.guild.id)]['users']
         wanted = ' '.join(text)
         if await Util.check_channel(ctx, True):

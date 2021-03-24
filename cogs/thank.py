@@ -72,6 +72,7 @@ class Thank(commands.Cog):
 
     @commands.command(name='my_thanks')
     async def my_thanks(self, ctx):
+        await ctx.message.delete()
         self.server_db = self.db[str(ctx.guild.id)]['users']
         if await Util.check_channel(ctx, True):
             user = self.server_db.find_one({'_id': str(ctx.author.id)})

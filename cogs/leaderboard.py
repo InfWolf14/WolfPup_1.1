@@ -15,6 +15,7 @@ class Leaderboard(commands.Cog):
 
     @commands.command(name='leaderboard', aliases=['lb'])
     async def leaderboard(self, ctx, *args):
+        await ctx.message.delete()
         self.server_db = self.db[str(ctx.guild.id)]['users']
         leaderboard = None
         if args:

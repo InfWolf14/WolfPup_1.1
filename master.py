@@ -23,12 +23,14 @@ class Master(commands.Cog, name='Master'):
     @commands.is_owner()
     async def ping(self, ctx):
         """Shows the bot ping in milliseconds."""
+        await ctx.message.delete()
         if await Util.check_channel(ctx, True):
             await ctx.send(f':ping_pong: **Pong!**⠀{round(self.bot.latency, 3)}ms')
 
     @commands.command(name='uptime')
     async def uptime(self, ctx):
         """Shows the uptime for the bot."""
+        await ctx.message.delete()
         if await Util.check_channel(ctx, True):
             current_time = time()
             difference = int(round(current_time - self.start_time))
@@ -55,30 +57,35 @@ class Master(commands.Cog, name='Master'):
                     return
                 config['prefix'] = prefix
                 with open(f'config/{ctx.guild.id}/config.json', 'w') as f:
-                    json.dump(config, f)
+                    json.dump(config, f, indent=2)
+                await ctx.send(embed=discord.Embed(title=f'Prefix changed to \"{prefix}\"'))
 
-    @commands.command(name="channel_config", hidden=True, aliases=['c_config'])
+    @commands.command(name='reset_config', hidden=True, aliases=['init_config'])
     @commands.is_owner()
-    async def channel_config(self, ctx, setting: str, channel: discord.TextChannel):
+    async def reset_config(self, ctx):
+        await Util.reset_config(ctx)
+
+    @commands.command(name='channel_config', hidden=True, aliases=['c_config'])
+    @commands.is_owner()
+    async def channel_config(self, ctx, setting: str, channel: discord.TextChannel, delete: str = ''):
         """Administrator command"""
         if os.path.isfile(f'config/{ctx.guild.id}/config.json'):
             with open(f'config/{ctx.guild.id}/config.json', 'r') as f:
                 config = json.load(f)
-            if ctx.channel.id == config['channel_config']['config_channel']:
-                try:
-                    if isinstance(config['channel_config'][setting], list):
-                        config['channel_config'][setting].append(channel.id)
-                        config['channel_config'][setting] = list(set(config['channel_config'][setting]))
+            try:
+                if isinstance(config['channel_config'][setting], list):
+                    if delete == '-r':
+                        config['channel_config'][setting].remove(channel.id)
                     else:
-                        config['channel_config'][setting] = int(channel.id)
-                    channel = await self.bot.fetch_channel(channel.id)
-                    await ctx.send(embed=discord.Embed(title=f'Successfully updated \'{setting}\' settings',
-                                                       description=f'**Name** : {channel.name}\n**ID** : {channel.id}'))
-                except KeyError:
-                    await ctx.send(embed=discord.Embed(title=f'**[Error]** : \'{setting}\' setting not found'))
-                    return
-                with open(f'config/{ctx.guild.id}/config.json', 'w') as f:
-                    json.dump(config, f)
+                        config['channel_config'][setting].append(channel.id)
+                else:
+                    config['channel_config'][setting] = channel.id
+            except KeyError:
+                await ctx.send(embed=discord.Embed(title=f'**[Error]** : \"{setting}\" is not defined'))
+                return
+            with open(f'config/{ctx.guild.id}/config.json', 'w') as f:
+                json.dump(config, f, indent=2)
+            await ctx.send(embed=discord.Embed(title=f'Channel config \"{setting}\" updated'))
 
     @commands.command(name='role_config', hidden=True, aliases=['r_config'])
     @commands.is_owner()
@@ -87,20 +94,19 @@ class Master(commands.Cog, name='Master'):
         if os.path.isfile(f'config/{ctx.guild.id}/config.json'):
             with open(f'config/{ctx.guild.id}/config.json', 'r') as f:
                 config = json.load(f)
-            if ctx.channel.id == config['channel_config']['config_channel']:
-                try:
-                    config['role_config'][setting] = int(role.id)
-                    await ctx.send(embed=discord.Embed(title=f'Changed \'{setting}\' settings',
-                                                       description=f'**Name** : {role.name}\n**ID** : {role.id}'))
-                except KeyError:
-                    await ctx.send(embed=discord.Embed(title=f'**[Error]** : \'{setting}\' setting not found'))
-                    return
-                with open(f'config/{ctx.guild.id}/config.json', 'w') as f:
-                    json.dump(config, f)
+            try:
+                config['role_config'][setting] = role.id
+            except KeyError:
+                await ctx.send(embed=discord.Embed(title=f'**[Error]** : \"{setting}\" is not defined'))
+                return
+            with open(f'config/{ctx.guild.id}/config.json', 'w') as f:
+                json.dump(config, f, indent=2)
+            await ctx.send(embed=discord.Embed(title=f'Role config \"{setting}\" updated'))
 
     @commands.command(aliases=['setstatus', 'botstatus'], hidden=True)
     @commands.is_owner()
     async def status(self, ctx, arg: str, *status: str):
+        """Administrator command"""
         if os.path.isfile(f'config/{ctx.guild.id}/config.json'):
             with open(f'config/{ctx.guild.id}/config.json', 'r') as f:
                 config = json.load(f)
@@ -113,21 +119,10 @@ class Master(commands.Cog, name='Master'):
                     return
                 if arg == 'playing':
                     await self.bot.change_presence(activity=discord.Game(name=joined_status))
-                    # Couldn't get this part to work. Will continue working on it. No the response works, but it doesn't seem
-                    # to take it in the last line.
-                    """if arg == 'streaming':
-                        await ctx.send('What is the url of the stream?', delete_after=10)
-                        response = await self.bot.wait_for('message', check=self.message_check(channel=ctx.channel))
-                        print(response.content)
-                        url_string = str(response.content)
-                        # Setting `Streaming ` status
-                        await self.bot.change_presence(activity=discord.Streaming(name=joined_status, url=url_string))"""
                 if arg == 'listening':
-                    await self.bot.change_presence(
-                        activity=discord.Activity(type=discord.ActivityType.listening, name=joined_status))
+                    await self.bot.change_presence(activity=discord.Activity(type=discord.ActivityType.listening, name=joined_status))
                 if arg == 'watching':
-                    await self.bot.change_presence(
-                        activity=discord.Activity(type=discord.ActivityType.watching, name=joined_status))
+                    await self.bot.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name=joined_status))
                 await ctx.send(f'status changed to {arg} {joined_status}')
 
     @commands.command(name='load', hidden=True)
@@ -185,10 +180,10 @@ class Master(commands.Cog, name='Master'):
                 else:
                     await discord.Message.add_reaction(ctx.message, '\U00002705')
 
-    @commands.command(name="build_db", hidden=True, aliases=['rebuild_user_db'])
+    @commands.command(name="build_user_db", hidden=True, aliases=['rebuild_user_db'])
     @commands.is_owner()
     async def build_user_db(self, ctx, member: discord.Member = None):
-        """Administrator command."""
+        """Administrator command"""
         if os.path.isfile(f'config/{ctx.guild.id}/config.json'):
             with open(f'config/{ctx.guild.id}/config.json', 'r') as f:
                 config = json.load(f)

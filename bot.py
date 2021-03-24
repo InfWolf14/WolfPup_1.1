@@ -37,10 +37,9 @@ async def daily():
         if os.path.isfile(f'config/{str(guild.id)}/config.json'):
             with open(f'config/{str(guild.id)}/config.json', 'r') as f:
                 config = json.load(f)
-                config_channel = config['channel_config']['config_channel']
-        if config_channel:
+        if config['channel_config']['config_channel']:
             try:
-                config_channel = await bot.fetch_channel(config_channel)
+                config_channel = await bot.fetch_channel(config['channel_config']['config_channel'])
             except discord.errors.NotFound:
                 return
             # Daily Reset Functions Here
@@ -54,10 +53,9 @@ async def weekly():
         if os.path.isfile(f'config/{str(guild.id)}/config.json'):
             with open(f'config/{str(guild.id)}/config.json', 'r') as f:
                 config = json.load(f)
-                config_channel = config['channel_config']['config_channel']
-        if config_channel:
+        if config['channel_config']['config_channel']:
             try:
-                config_channel = await bot.fetch_channel(config_channel)
+                config_channel = await bot.fetch_channel(config['channel_config']['config_channel'])
             except discord.errors.NotFound:
                 return
             # Weekly Reset Functions Here
@@ -70,10 +68,9 @@ async def monthly():
         if os.path.isfile(f'config/{str(guild.id)}/config.json'):
             with open(f'config/{str(guild.id)}/config.json', 'r') as f:
                 config = json.load(f)
-                config_channel = config['channel_config']['config_channel']
-        if config_channel:
+        if config['channel_config']['config_channel']:
             try:
-                config_channel = await bot.fetch_channel(config_channel)
+                config_channel = await bot.fetch_channel(config['channel_config']['config_channel'])
             except discord.errors.NotFound:
                 return
             # Monthly Reset Functions Here
@@ -86,7 +83,7 @@ async def on_member_join(member):
     with open(f'config/{str(member.guild.id)}/config.json', 'r') as f:
         config = json.load(f)
     config_channel = bot.get_channel(int(config['config_channel']))
-    await Master.build_db(config_channel, member)
+    await Master.build_user_db(config_channel, member)
 
 
 @bot.event
@@ -121,6 +118,9 @@ async def on_ready():
     schedule.add_job(weekly, 'cron', week='*', day_of_week='sun', hour=6)
     schedule.add_job(monthly, 'cron', month='*', day='1')
     schedule.start()
+    for guild in bot.guilds:
+        if not os.path.isdir(f'config/{guild.id}/'):
+            os.makedirs(f'config/{guild.id}/')
 
 
 async def on_disconnect():
