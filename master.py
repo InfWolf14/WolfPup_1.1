@@ -65,43 +65,33 @@ class Master(commands.Cog, name='Master'):
     async def reset_config(self, ctx):
         await Util.reset_config(ctx)
 
-    @commands.command(name='channel_config', hidden=True, aliases=['c_config'])
+    @commands.command(name='config', hidden=True, aliases=['cfg'])
     @commands.is_owner()
-    async def channel_config(self, ctx, setting: str, channel: discord.TextChannel, delete: str = ''):
+    async def config(self, ctx, cfg: str, setting: str, value, delete: str = None):
         """Administrator command"""
         if os.path.isfile(f'config/{ctx.guild.id}/config.json'):
             with open(f'config/{ctx.guild.id}/config.json', 'r') as f:
                 config = json.load(f)
+            if isinstance(value, discord.TextChannel):
+                value = value.id
+            elif isinstance(value, discord.Role):
+                value = value.id
+            elif isinstance(value, discord.Reaction):
+                value = value.emoji
             try:
-                if isinstance(config['channel_config'][setting], list):
+                if isinstance(config[cfg][setting], list):
                     if delete == '-r':
-                        config['channel_config'][setting].remove(channel.id)
+                        config[cfg][setting].remove(value)
                     else:
-                        config['channel_config'][setting].append(channel.id)
+                        config[cfg][setting].append(value)
                 else:
-                    config['channel_config'][setting] = channel.id
+                    config[cfg][setting] = value
             except KeyError:
                 await ctx.send(embed=discord.Embed(title=f'**[Error]** : \"{setting}\" is not defined'))
                 return
             with open(f'config/{ctx.guild.id}/config.json', 'w') as f:
                 json.dump(config, f, indent=2)
-            await ctx.send(embed=discord.Embed(title=f'Channel config \"{setting}\" updated'))
-
-    @commands.command(name='role_config', hidden=True, aliases=['r_config'])
-    @commands.is_owner()
-    async def role_config(self, ctx, setting: str, role: discord.Role):
-        """Administrator command"""
-        if os.path.isfile(f'config/{ctx.guild.id}/config.json'):
-            with open(f'config/{ctx.guild.id}/config.json', 'r') as f:
-                config = json.load(f)
-            try:
-                config['role_config'][setting] = role.id
-            except KeyError:
-                await ctx.send(embed=discord.Embed(title=f'**[Error]** : \"{setting}\" is not defined'))
-                return
-            with open(f'config/{ctx.guild.id}/config.json', 'w') as f:
-                json.dump(config, f, indent=2)
-            await ctx.send(embed=discord.Embed(title=f'Role config \"{setting}\" updated'))
+            await ctx.send(embed=discord.Embed(title=f'{cfg} \"{setting}\" updated'))
 
     @commands.command(aliases=['setstatus', 'botstatus'], hidden=True)
     @commands.is_owner()
