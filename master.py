@@ -72,12 +72,17 @@ class Master(commands.Cog, name='Master'):
         if os.path.isfile(f'config/{ctx.guild.id}/config.json'):
             with open(f'config/{ctx.guild.id}/config.json', 'r') as f:
                 config = json.load(f)
-            if isinstance(value, discord.TextChannel):
+            try:
+                value = await commands.TextChannelConverter().convert(ctx, value)
                 value = value.id
-            elif isinstance(value, discord.Role):
+            except (TypeError, commands.errors.ChannelNotFound): pass
+            try:
+                value = await commands.RoleConverter().convert(ctx, value)
                 value = value.id
-            elif isinstance(value, discord.Reaction):
-                value = value.emoji
+            except (TypeError, commands.errors.RoleNotFound): pass
+            try:
+                value = await commands.EmojiConverter().convert(ctx, value)
+            except (TypeError, commands.errors.EmojiNotFound): pass
             try:
                 if isinstance(config[cfg][setting], list):
                     if delete == '-r':
@@ -91,7 +96,8 @@ class Master(commands.Cog, name='Master'):
                 return
             with open(f'config/{ctx.guild.id}/config.json', 'w') as f:
                 json.dump(config, f, indent=2)
-            await ctx.send(embed=discord.Embed(title=f'{cfg} \"{setting}\" updated'))
+            await ctx.send(embed=discord.Embed(title='Updated configuration',
+                                               description=f'**Config** : {cfg}\n**Setting** : {setting}'))
 
     @commands.command(aliases=['setstatus', 'botstatus'], hidden=True)
     @commands.is_owner()

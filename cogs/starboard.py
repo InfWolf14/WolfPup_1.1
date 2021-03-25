@@ -14,7 +14,7 @@ class Starboard(commands.Cog, name='Starboard'):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(name='init_starboard', hidden=True, aliases=['sb_init'])
+    @commands.command(name='init_starboard', hidden=True, aliases=['init_sb', 'sb_init'])
     @commands.is_owner()
     async def init_starboard(self, ctx):
         if os.path.isfile(f'config/{ctx.guild.id}/config.json'):

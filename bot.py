@@ -96,8 +96,7 @@ async def on_member_leave(member):
 
 
 @bot.event
-async def on_command_error(ctx, error):
-    error = error.__cause__ or error
+async def on_error(ctx, error):
     try:
         await ctx.message.delete()
     except discord.errors.NotFound:

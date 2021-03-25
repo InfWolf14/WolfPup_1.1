@@ -72,6 +72,8 @@ class Util:
                 'top_5_blacklist': []
             }
         }
+        if os.path.isfile(f'config/{ctx.guild.id}/config.json'):
+            os.remove(f'config/{ctx.guild.id}/config.json')
         with open(f'config/{ctx.guild.id}/config.json', 'w') as f:
             json.dump(config, f, indent=2)
         await ctx.send(embed=discord.Embed(title=f'Default server config set'))
