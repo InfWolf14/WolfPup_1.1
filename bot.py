@@ -20,7 +20,7 @@ def get_prefix(bot, message):
     return commands.when_mentioned_or(*prefixes)(bot, message)
 
 
-initial_cogs = ['master', 'cogs.mod', 'cogs.role', 'cogs.welcome',
+initial_cogs = ['master', 'cogs.mod', 'cogs.welcome',
                 'cogs.level', 'cogs.profile', 'cogs.thank', 'cogs.leaderboard']
 intents = discord.Intents.default()
 intents.members = True
