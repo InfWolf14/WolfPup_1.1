@@ -1,6 +1,7 @@
 import os
 import json
 import random
+import asyncio
 from math import sqrt, floor
 import datetime as dt
 import discord
@@ -26,7 +27,7 @@ class Level(commands.Cog, name='Level'):
             pending = await ctx.send(embed=discord.Embed(title='Rebuilding Level stats...'))
         if await Util.check_channel(ctx, True):
             new_level = {'level': 1, 'exp': 0, 'exp_streak': 0, 'timestamp': dt.datetime.utcnow(),
-                         'flags': {'daily': True, 'thank': True}}
+                         'flags': {'daily': True, 'daily_stamp': dt.datetime.utcnow(), 'thank': True}}
             if member:
                 self.server_db.find_one_and_update({"_id": str(member.id)}, {'$set': new_level}, upsert=True)
                 return
@@ -48,7 +49,41 @@ class Level(commands.Cog, name='Level'):
     @commands.command(name='daily')
     async def daily(self, ctx, member: discord.Member = None):
         """Use to claim your daily exp bonus or give to a friend!"""
-        return
+        self.server_db = self.db[str(ctx.guild.id)]['users']
+        if member is None:
+            member = ctx.author
+        if await Util.check_channel(ctx, True):
+            self.server_db.find_one_and_update({'_id': str(ctx.author.id)}, {'$inc': {'exp_streak': 1}})
+            user = self.server_db.find_one({'_id': str(ctx.author.id)})
+            if user['flags']['daily']:
+                streak = user['exp_streak']
+                new_embed = discord.Embed(title='You\'ve claimed your daily bonus!',
+                                          color=discord.Colour.gold())
+                new_embed.set_thumbnail(url='https://cdn.discordapp.com/attachments/532380077896237061/800924153053970476'
+                                            '/terry_coin.png')
+                if member != ctx.author:
+                    new_embed.title = 'You\'ve given your bonus to your friend!'
+                if (user['flags']['daily_stamp']+dt.timedelta(hours=36)) < dt.datetime.utcnow():
+                    new_embed.description = f'This is day {streak}. You missed your streak window...'
+                    self.server_db.find_one_and_update({'_id': str(ctx.author.id)}, {'$set': {'exp_streak': 0}})
+                    streak -= 1
+                else:
+                    if streak >= 5:
+                        new_embed.description = '__BONUS__ This is your 5-day streak! __BONUS__'
+                        self.server_db.find_one_and_update({'_id': str(ctx.author.id)}, {'$set': {'exp_streak': 0}})
+                        streak = 10
+                    else:
+                        new_embed.description = f'This is day {streak}. Keep it up to day 5!'
+                self.server_db.find_one_and_update({'_id': str(ctx.author.id)}, {'$set': {'flags.daily': False}})
+                self.server_db.find_one_and_update({'_id': str(ctx.author.id)}, {'$set': {'flags.daily_stamp': dt.datetime.utcnow()}})
+                daily_exp = int(random.randint(150, 250)*(1+(0.15*streak)))
+                await self.update_experience(ctx.guild.id, member.id, daily_exp)
+                await ctx.send(embed=new_embed)
+            else:
+                await ctx.message.delete()
+                pending = await ctx.send(embed=discord.Embed(title='You\'ve already claimed your daily bonus today!'))
+                await asyncio.sleep(5)
+                await pending.delete()
 
     @commands.command(name='add_experience', hidden=True, pass_context=True, aliases=['xp'])
     @commands.has_guild_permissions(administrator=True)

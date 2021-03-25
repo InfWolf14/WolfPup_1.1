@@ -40,7 +40,7 @@ class Util:
 
     async def reset_user_flags(self, ctx):
         self.server_db = self.db[str(ctx.guild.id)]['users']
-        reset_flags = {'flags': {'daily': True, 'thank': True}}
+        reset_flags = {'flags': {'daily': True, 'daily_stamp': None, thank': True}}
         for member in ctx.guild.members:
             if not member.bot:
                 self.server_db.find_one_and_update({"_id": str(member.id)}, {'$set': reset_flags})
@@ -75,9 +75,3 @@ class Util:
         with open(f'config/{ctx.guild.id}/config.json', 'w') as f:
             json.dump(config, f, indent=2)
         await ctx.send(embed=discord.Embed(title=f'Default server config set'))
-
-    async def award_roles(self, ctx, roles: list):
-        return
-
-    async def remove_roles(self, ctx, roles: list):
-        return
