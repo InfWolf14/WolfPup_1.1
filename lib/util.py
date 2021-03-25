@@ -68,7 +68,8 @@ class Util:
                 'most_helpful': None,
                 'most_thankful': None,
                 'triumphant': None,
-                'birthday': None
+                'birthday': None,
+                'top_5_blacklist': []
             }
         }
         with open(f'config/{ctx.guild.id}/config.json', 'w') as f:
