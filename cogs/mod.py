@@ -100,6 +100,8 @@ class Mod(commands.Cog):
                 return
             elif payload.cached_message:
                 message = payload.cached_message
+                if config['prefix'] in message.content[:len(config['prefix'])] or message.author.bot:
+                    return
                 embed = discord.Embed(title='Message Deleted')
                 embed.add_field(name='Message Author:', value=message.author.mention)
                 embed.add_field(name='Channel:', value=message.channel.mention)

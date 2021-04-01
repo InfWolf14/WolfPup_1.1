@@ -1,6 +1,7 @@
 import os
 import json
 import asyncio
+import traceback as tb
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 import discord
 from discord.ext import commands
@@ -82,7 +83,7 @@ async def monthly():
 async def on_member_join(member):
     with open(f'config/{str(member.guild.id)}/config.json', 'r') as f:
         config = json.load(f)
-    config_channel = bot.get_channel(int(config['config_channel']))
+    config_channel = bot.get_channel(int(config['channel_config']['config_channel']))
     await Master.build_user_db(config_channel, member)
 
 
@@ -90,23 +91,55 @@ async def on_member_join(member):
 async def on_member_leave(member):
     with open(f'config/{str(member.guild.id)}/config.json', 'r') as f:
         config = json.load(f)
-    config_channel = bot.get_channel(int(config['config_channel']))
+    config_channel = bot.get_channel(int(config['channel_config']['config_channel']))
     Mongo.init_db(Mongo())['server'][str(member.guild.id)].find_one_and_delete({'_id': str(member.id)})
     config_channel.send(embed=discord.Embed(title=f'{member.displayname} left'))
 
 
 @bot.event
-async def on_error(ctx, error):
+async def on_command_error(ctx, e):
+    config_channel = None
+    if os.path.isfile(f'config/{str(ctx.guild.id)}/config.json'):
+        with open(f'config/{str(ctx.guild.id)}/config.json', 'r') as f:
+            config = json.load(f)
+        config_channel = await bot.fetch_channel(config['channel_config']['config_channel'])
+    new_embed = discord.Embed(title=f'**[Error]** {type(e).__name__} **[Error]**')
     try:
+        new_embed.description = f'Message: \"*{ctx.message.content}*\"'
         await ctx.message.delete()
     except discord.errors.NotFound:
         pass
-    new_embed = discord.Embed(title=f'**[Error]** : {type(error).__name__}',
-                              description=f'{error}')
+    new_embed.add_field(name='Traceback Information:', value=''.join(tb.format_exception_only(type(e), e)).replace(':', ':\n'))
     new_embed.set_footer(text=f'Use: [ {ctx.prefix}help ] for assistance')
-    error = await ctx.send(embed=new_embed)
-    await asyncio.sleep(5)
-    await error.delete()
+    if config_channel is not None:
+        error = await config_channel.send(embed=new_embed)
+    else:
+        error = await ctx.send(embed=new_embed)
+    # await asyncio.sleep(30)
+    # await error.delete()
+
+
+@bot.event
+async def on_error(ctx, e):
+    config_channel = None
+    if os.path.isfile(f'config/{str(ctx.guild.id)}/config.json'):
+        with open(f'config/{str(ctx.guild.id)}/config.json', 'r') as f:
+            config = json.load(f)
+        config_channel = await bot.fetch_channel(config['channel_config']['config_channel'])
+    new_embed = discord.Embed(title=f'**[Error]** {type(e).__name__} **[Error]**')
+    try:
+        new_embed.description = f'Message: \"*{ctx.message.content}*\"'
+        await ctx.message.delete()
+    except discord.errors.NotFound:
+        pass
+    new_embed.add_field(name='Traceback Information:', value=''.join(tb.format_exception_only(type(e), e)).replace(':', ':\n'))
+    new_embed.set_footer(text=f'Use: [ {ctx.prefix}help ] for assistance')
+    if config_channel is not None:
+        error = await config_channel.send(embed=new_embed)
+    else:
+        error = await ctx.send(embed=new_embed)
+    # await asyncio.sleep(30)
+    # await error.delete()
 
 
 @bot.event

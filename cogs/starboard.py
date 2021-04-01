@@ -4,15 +4,13 @@ import discord
 from discord.ext import commands
 
 
-STAR_URL = 'https://cdn.discordapp.com/attachments/767568459939708950/777605519623585822/11_Discord_icon_4_20.png'
-STAR_PIN_URL = 'https://cdn.discordapp.com/attachments/767568459939708950/777605535801016350/11_Discord_icon_4_80.png'
-ERROR_URL = 'https://cdn.discordapp.com/attachments/767568459939708950/777606962480807956/11_Discord_icon_2_80.png'
-SUCCESS_URL = 'https://cdn.discordapp.com/attachments/767568459939708950/767568508414066739/Status_Indicators12.png'
-
-
 class Starboard(commands.Cog, name='Starboard'):
     def __init__(self, bot):
         self.bot = bot
+        self.star_url = 'https://cdn.discordapp.com/attachments/767568459939708950/777605519623585822/11_Discord_icon_4_20.png'
+        self.pinned_url = 'https://cdn.discordapp.com/attachments/767568459939708950/777605535801016350/11_Discord_icon_4_80.png'
+        self.error_url = 'https://cdn.discordapp.com/attachments/767568459939708950/777606962480807956/11_Discord_icon_2_80.png'
+        self.success_url = 'https://cdn.discordapp.com/attachments/767568459939708950/767568508414066739/Status_Indicators12.png'
 
     @commands.command(name='init_starboard', hidden=True, aliases=['init_sb', 'sb_init'])
     @commands.is_owner()
@@ -69,7 +67,7 @@ class Starboard(commands.Cog, name='Starboard'):
                         embed.set_image(url=copy_embed.thumbnail.url)
                 elif message.attachments:
                     embed.set_image(url=message.attachments[0].url)
-                embed.set_footer(icon_url=STAR_URL, text='Original Posted')
+                embed.set_footer(icon_url=self.star_url, text='Original Posted')
                 await starboard_channel.send(
                     content=f"> **Posted in** {channel.mention} by {message.author.mention}", embed=embed)
                 await message.add_reaction(config['starboard_config']['starred_react'])
