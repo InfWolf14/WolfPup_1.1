@@ -25,6 +25,9 @@ initial_cogs = ['master', 'cogs.mod', 'cogs.welcome',
                 'cogs.level', 'cogs.profile', 'cogs.thank', 'cogs.leaderboard']
 intents = discord.Intents.default()
 intents.members = True
+intents.messages = True
+intents.reactions = True
+
 bot = commands.Bot(command_prefix=get_prefix, description='A bot designed for GoldxGuns', intents=intents)
 if __name__ == '__main__':
     for extension in initial_cogs:
