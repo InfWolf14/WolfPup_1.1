@@ -117,11 +117,13 @@ async def on_command_error(ctx, *e, **kwargs):
                             value=''.join(tb.format_exception_only(type(e), e)).replace(':', ':\n'))
     except (AttributeError, discord.errors.NotFound):
         pass
-    new_embed.set_footer(text=f'Use: [ {ctx.prefix}help ] for assistance')
+    try:
+        new_embed.set_footer(text=f'Use: [ {ctx.prefix}help ] for assistance')
+    except: pass
     if config_channel is not None:
         error = await config_channel.send(embed=new_embed)
     else:
-        error = await ctx.send(embed=new_embed)
+        print(''.join(tb.format_exception_only(type(e), e)).replace(':', ':\n'))
     # await asyncio.sleep(30)
     # await error.delete()
 
@@ -143,11 +145,13 @@ async def on_error(ctx, *e, **kwargs):
                             value=''.join(tb.format_exception_only(type(e), e)).replace(':', ':\n'))
     except (AttributeError, discord.errors.NotFound):
         pass
-    new_embed.set_footer(text=f'Use: [ {ctx.prefix}help ] for assistance')
+    try:
+        new_embed.set_footer(text=f'Use: [ {ctx.prefix}help ] for assistance')
+    except: pass
     if config_channel is not None:
         error = await config_channel.send(embed=new_embed)
     else:
-        error = await ctx.send(embed=new_embed)
+        print(''.join(tb.format_exception_only(type(e), e)).replace(':', ':\n'))
     # await asyncio.sleep(30)
     # await error.delete()
 
