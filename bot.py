@@ -24,6 +24,9 @@ def get_prefix(bot, message):
 initial_cogs = ['master', 'cogs.starboard']
 intents = discord.Intents.default()
 intents.members = True
+intents.messages = True
+intents.reactions = True
+
 bot = commands.Bot(command_prefix=get_prefix, description='A bot designed for GoldxGuns', intents=intents)
 if __name__ == '__main__':
     for extension in initial_cogs:
