@@ -65,6 +65,25 @@ async def weekly():
             # Weekly Reset Functions Here
             await config_channel.send(embed=discord.Embed(title=f'{config_channel.guild.name} Weekly Reset!'))
 
+async def cactpot():
+    """Cactpot Reminder"""
+    for server in bot.guilds:
+        with open(f'assets/json/config.json', 'r') as f:
+            config = json.load(f)
+        role = server.get_role(int(config[str(server.id)]['cactrole']))
+        channel = bot.get_channel(int(config[str(server.id)['cactpot']]))
+        if not role or not channel:
+            return
+        embed = discord.Embed(title='**The JumboCactPot has been drawn!', description="Don't forget to check your "
+                                                                                      "tickets within the hour for the "
+                                                                                      "Early Bird bonus (+7%). If the "
+                                                                                      "Jackpot II action isn't activated"
+                                                                                      " on the Free Company, then please "
+                                                                                      "activate it now.")
+        embed.set_image(url="https://img.finalfantasyxiv.com/lds/blog_image/jp_blog/jp20170607_iw_04.png")
+
+        await channel.send({role.ment})
+        await channel.send(embed=embed)
 
 async def monthly():
     """Monthly reset timer"""
@@ -152,6 +171,7 @@ async def on_ready():
     schedule.add_job(daily, 'cron', day='*', hour=18)
     schedule.add_job(weekly, 'cron', week='*', day_of_week='sun', hour=6)
     schedule.add_job(monthly, 'cron', month='*', day='1')
+    schedule.add_job(cactpot, 'cron', week='*', day_of_week='sat', hour=20)
     schedule.start()
     for guild in bot.guilds:
         if not os.path.isdir(f'config/{guild.id}/'):

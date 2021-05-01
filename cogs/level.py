@@ -144,6 +144,8 @@ class Level(commands.Cog, name='Level'):
 
     @commands.Cog.listener()
     async def on_message(self, message):
+        if isinstance(message.channel, discord.DMChannel):
+            return
         if not message.author.bot and await Util.check_exp_blacklist(message):
             self.server_db = self.db[str(message.guild.id)]['users']
             user = self.server_db.find_one({'_id': str(message.author.id)})
