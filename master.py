@@ -75,16 +75,23 @@ class Master(commands.Cog, name='Master'):
             try:
                 value = await commands.TextChannelConverter().convert(ctx, value)
                 value = value.id
-            except (TypeError, commands.errors.ChannelNotFound): pass
+            except (TypeError, commands.errors.ChannelNotFound): print('Not channel')
             try:
                 value = await commands.RoleConverter().convert(ctx, value)
                 value = value.id
-            except (TypeError, commands.errors.RoleNotFound): pass
+            except (TypeError, commands.errors.RoleNotFound): print('Not role')
+            try:
+                value = await commands.PartialEmojiConverter().convert(ctx, value)
+                value = f':{value.name}:{ctx.guild.id}:'
+            except (TypeError, commands.errors.PartialEmojiConversionFailure): pass
             try:
                 value = await commands.EmojiConverter().convert(ctx, value)
-            except (TypeError, commands.errors.EmojiNotFound): pass
-            if value.isdigit():
-                value = int(value)
+                value = value.name
+            except (TypeError, commands.errors.EmojiNotFound): print('Not emoji')
+            try:
+                if value.isdigit():
+                    value = int(value)
+            except AttributeError: pass
             try:
                 if isinstance(config[cfg][setting], list):
                     if delete == '-r':
