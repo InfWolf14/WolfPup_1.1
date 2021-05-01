@@ -74,7 +74,7 @@ async def cactpot():
         channel = bot.get_channel(int(config[str(server.id)['cactpot']]))
         if not role or not channel:
             return
-        embed = discord.Embed(title='**The JumboCactPot has been drawn!', description="Don't forget to check your "
+        embed = discord.Embed(title='**The JumboCactPot has been drawn!**', description="Don't forget to check your "
                                                                                       "tickets within the hour for the "
                                                                                       "Early Bird bonus (+7%). If the "
                                                                                       "Jackpot II action isn't activated"
