@@ -82,11 +82,12 @@ class Master(commands.Cog, name='Master'):
             except (TypeError, commands.errors.RoleNotFound): pass
             try:
                 value = await commands.PartialEmojiConverter().convert(ctx, value)
-                value = f':{value.name}:{ctx.guild.id}:'
+                value = str(value)
             except (TypeError, commands.errors.PartialEmojiConversionFailure):
                 value = await commands.EmojiConverter().convert(ctx, value)
                 value = value.name
-            except (TypeError, commands.errors.EmojiNotFound):
+            except (TypeError, commands.errors.EmojiNotFound): pass
+            try:
                 if value.isdigit():
                     value = int(value)
             except AttributeError: pass

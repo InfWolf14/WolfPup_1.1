@@ -39,10 +39,10 @@ class Starboard(commands.Cog, name='Starboard'):
             channel = self.bot.get_channel(payload.channel_id)
             starboard_channel = self.bot.get_channel(config['starboard_config']['starboard_channel'])
             message = await channel.fetch_message(payload.message_id)
-            reaction = discord.utils.get(message.reactions, emoji=payload.emoji.name)
+            reaction = discord.utils.get(message.reactions, emoji=self.bot.get_emoji(payload.emoji.id))
             if channel.id != starboard_channel.id:
                 already_posted = discord.utils.get(message.reactions, emoji=config['starboard_config']['starred_react'])
-                if payload.emoji.name == config['starboard_config']['star_react']:
+                if str(payload.emoji) == config['starboard_config']['star_react']:
                     if reaction.count >= config['starboard_config']['threshold'] and not already_posted:
                         copy_embed = ""
                         if message.embeds:
@@ -50,7 +50,9 @@ class Starboard(commands.Cog, name='Starboard'):
                             if message.content:
                                 content = message.content.__add__(f'\n\n**Link Preview:**\n{copy_embed["description"]}')
                             else:
-                                content = copy_embed.description
+                                try:
+                                    content = copy_embed.description
+                                except AttributeError: pass
                             if "fields" in copy_embed:
                                 for embeds in message.embeds:
                                     for field in embeds.fields:
