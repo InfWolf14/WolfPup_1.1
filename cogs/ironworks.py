@@ -84,8 +84,8 @@ class IronWorks(commands.Cog):
                     if not user == self.bot.user:
                         await react.remove(user)
         else:
-            await discord.Message.add_reaction(message, self.bot.get_emoji(config['accept_emoji']))
-            await discord.Message.add_reaction(message, self.bot.get_emoji(config['un-accept_emoji']))
+            await discord.Message.add_reaction(message, config['conf_react'])
+            await discord.Message.add_reaction(message, config['decl_react'])
 
     @commands.command(aliases=['comm'], description="Use this to commission in #xiv-ironworks")
     async def commission(self, ctx, *args):
@@ -94,8 +94,8 @@ class IronWorks(commands.Cog):
         self.prefix = ctx.prefix
         channel = await self.bot.fetch_channel(ctx.channel.id)
         comm_desc = ' '.join(args)
-        if os.path.isfile(f'config/{ctx.guild.id}/config.json'):
-            with open(f'config/{ctx.guild.id}/config.json', 'r') as f:
+        if os.path.isfile(f'config/{str(ctx.guild.id)}/config.json'):
+            with open(f'config/{str(ctx.guild.id)}/config.json', 'r') as f:
                 config = json.load(f)
         try:
             config = config['ironworks_config']
@@ -118,8 +118,6 @@ class IronWorks(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message(self, ctx):
-        if ctx.author == self.bot.user:
-            return
         channel = await self.bot.fetch_channel(ctx.channel.id)
         if os.path.isfile(f'config/{str(ctx.guild.id)}/config.json'):
             with open(f'config/{str(ctx.guild.id)}/config.json', 'r') as f:
@@ -165,12 +163,12 @@ class IronWorks(commands.Cog):
             if member.nick:
                 react_user = member.nick
             if react_user not in comm_owner:
-                if str(payload.emoji.name) == config['conf_emoji']:
+                if str(payload.emoji.name) == config['conf_react']:
                     await message.edit(embed=(await self.build_embed(old_embed=message.embeds[0], add=member)))
-                elif str(payload.emoji.name) == config['decl_emoji']:
+                elif str(payload.emoji.name) == config['decl_react']:
                     await message.edit(embed=(await self.build_embed(old_embed=message.embeds[0], remove=member)))
             elif react_user in message.embeds[0].footer.text:
-                if str(payload.emoji.name) == config['decl_emoji']:
+                if str(payload.emoji.name) == config['decl_react']:
                     await discord.Message.delete(message)
                     return
             await self.build_embed_reacts(message, config)

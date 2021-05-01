@@ -21,7 +21,8 @@ def get_prefix(bot, message):
     return commands.when_mentioned_or(*prefixes)(bot, message)
 
 
-initial_cogs = ['master', 'cogs.starboard']
+initial_cogs = ['master', 'cogs.ironworks', 'cogs.leaderboard', 'cogs.level', 'cogs.mod', 'cogs.profile',
+                'cogs.roles', 'cogs.starboard', 'cogs.thank', 'cogs.welcome', 'cogs.wishwall']
 intents = discord.Intents.default()
 intents.members = True
 intents.messages = True
@@ -97,7 +98,7 @@ async def on_member_leave(member):
     Mongo.init_db(Mongo())['server'][str(member.guild.id)].find_one_and_delete({'_id': str(member.id)})
     config_channel.send(embed=discord.Embed(title=f'{member.displayname} left'))
 
-"""
+
 @bot.event
 async def on_command_error(ctx, *e, **kwargs):
     config_channel = None
@@ -149,7 +150,6 @@ async def on_error(ctx, *e, **kwargs):
         error = await ctx.send(embed=new_embed)
     # await asyncio.sleep(30)
     # await error.delete()
-"""
 
 
 @bot.event

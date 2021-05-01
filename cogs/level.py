@@ -33,7 +33,6 @@ class Level(commands.Cog, name='Level'):
                 return
             for member in ctx.guild.members:
                 if not member.bot:
-                    new_level['exp'] = random.randint(100, 15000)
                     self.server_db.find_one_and_update({"_id": str(member.id)}, {'$set': new_level}, upsert=True)
             await pending.edit(embed=discord.Embed(title='Done'))
             return pending
@@ -144,6 +143,8 @@ class Level(commands.Cog, name='Level'):
 
     @commands.Cog.listener()
     async def on_message(self, message):
+        if isinstance(message.channel, discord.DMChannel):
+            return
         if not message.author.bot and await Util.check_exp_blacklist(message):
             self.server_db = self.db[str(message.guild.id)]['users']
             user = self.server_db.find_one({'_id': str(message.author.id)})

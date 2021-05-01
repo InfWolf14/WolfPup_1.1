@@ -7,8 +7,6 @@ from discord.ext.commands.errors import EmojiNotFound
 
 
 class RolesCog(commands.Cog, name='roles'):
-    """Role Reaction System"""
-
     def __init__(self, bot):
         self.bot = bot
         self.db = Mongo.init_db(Mongo())
@@ -18,7 +16,6 @@ class RolesCog(commands.Cog, name='roles'):
     async def on_raw_reaction_remove(self, payload):
         server = self.bot.get_guild(payload.guild_id)
         user = server.get_member(payload.user_id)
-
         if user.bot:
             return
         self.server_db = self.db[str(payload.guild_id)]['roles']
@@ -62,13 +59,10 @@ class RolesCog(commands.Cog, name='roles'):
         channel = await user.create_dm()
         await channel.send(f'{role.name} was successfully added')
 
-
-
     @commands.command(hidden=True)
     @has_permissions(administrator=True)
     async def set_role(self, ctx, role: discord.Role, message: int, emoji: discord.Emoji):
         try:
-            print(emoji)
             with open(f'assets/json/config.json', 'r') as f:
                 config = json.load(f)
             self.server_db = self.db[str(ctx.guild.id)]['roles']
@@ -86,11 +80,9 @@ class RolesCog(commands.Cog, name='roles'):
     @has_permissions(administrator=True)
     async def build_roles(self, ctx):
         self.server_db = self.db[str(ctx.guild.id)]['roles']
-
         for role in ctx.guild.roles:
             self.server_db.insert_one({'_id': str(role.id)},
                                       {'$set': dict})
-
         await ctx.send('Done')
 
 

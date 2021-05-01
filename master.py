@@ -75,20 +75,18 @@ class Master(commands.Cog, name='Master'):
             try:
                 value = await commands.TextChannelConverter().convert(ctx, value)
                 value = value.id
-            except (TypeError, commands.errors.ChannelNotFound): print('Not channel')
+            except (TypeError, commands.errors.ChannelNotFound): pass
             try:
                 value = await commands.RoleConverter().convert(ctx, value)
                 value = value.id
-            except (TypeError, commands.errors.RoleNotFound): print('Not role')
+            except (TypeError, commands.errors.RoleNotFound): pass
             try:
                 value = await commands.PartialEmojiConverter().convert(ctx, value)
                 value = f':{value.name}:{ctx.guild.id}:'
-            except (TypeError, commands.errors.PartialEmojiConversionFailure): pass
-            try:
+            except (TypeError, commands.errors.PartialEmojiConversionFailure):
                 value = await commands.EmojiConverter().convert(ctx, value)
                 value = value.name
-            except (TypeError, commands.errors.EmojiNotFound): print('Not emoji')
-            try:
+            except (TypeError, commands.errors.EmojiNotFound):
                 if value.isdigit():
                     value = int(value)
             except AttributeError: pass
