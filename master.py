@@ -84,9 +84,11 @@ class Master(commands.Cog, name='Master'):
                 value = await commands.PartialEmojiConverter().convert(ctx, value)
                 value = str(value)
             except (TypeError, commands.errors.PartialEmojiConversionFailure):
-                value = await commands.EmojiConverter().convert(ctx, value)
-                value = value.name
-            except (TypeError, commands.errors.EmojiNotFound): pass
+                try:
+                    value = await commands.EmojiConverter().convert(ctx, value)
+                    value = value.name
+                except (TypeError, commands.errors.EmojiNotFound): pass
+            print(value)
             try:
                 if value.isdigit():
                     value = int(value)

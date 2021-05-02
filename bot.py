@@ -98,9 +98,9 @@ async def on_member_leave(member):
     Mongo.init_db(Mongo())['server'][str(member.guild.id)].find_one_and_delete({'_id': str(member.id)})
     config_channel.send(embed=discord.Embed(title=f'{member.displayname} left'))
 
-"""
+
 @bot.event
-async def on_command_error(ctx, *e, **kwargs):
+async def on_command_error(ctx, *e):
     config_channel = None
     try:
         if os.path.isfile(f'config/{str(ctx.guild.id)}/config.json'):
@@ -129,7 +129,7 @@ async def on_command_error(ctx, *e, **kwargs):
 
 
 @bot.event
-async def on_error(ctx, *e, **kwargs):
+async def on_error(ctx, *e):
     config_channel = None
     try:
         if os.path.isfile(f'config/{str(ctx.guild.id)}/config.json'):
@@ -154,7 +154,7 @@ async def on_error(ctx, *e, **kwargs):
         print(''.join(tb.format_exception_only(type(e), e)).replace(':', ':\n'))
     # await asyncio.sleep(30)
     # await error.delete()
-"""
+
 
 @bot.event
 async def on_ready():
