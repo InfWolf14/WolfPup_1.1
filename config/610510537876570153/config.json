@@ -29,8 +29,8 @@
   },
   "starboard_config": {
     "starboard_channel": 767453997002784798,
-    "star_react": "<:wrong:742105251271802910>",
-    "starred_react": "<:khcrown:677647056742907924>",
+    "star_react": "\u2b50",
+    "starred_react": "\ud83c\udf1f",
     "threshold": 1
   },
   "ironworks_config": {
@@ -41,6 +41,6 @@
   "wishwall_config": {
     "wishwall_channel": 746576322452783175,
     "conf_react": "\u2705",
-    "decl_react": "\u274e"
+    "decl_react": "<:wrong:742105251271802910>"
   }
 }
