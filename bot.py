@@ -17,7 +17,7 @@ def get_prefix(bot, message):
             config = json.load(f)
         prefixes = [config['prefix']]
     else:
-        prefixes = ['w^']
+        prefixes = ['*']
     return commands.when_mentioned_or(*prefixes)(bot, message)
 
 
@@ -184,5 +184,5 @@ async def on_disconnect():
 
 
 print('\nLoading token and connecting to client...')
-token = open('token', 'r').readline()
+token = open('token.txt', 'r').readline()
 bot.run(token, bot=True, reconnect=True)
