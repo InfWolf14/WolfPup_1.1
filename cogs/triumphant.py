@@ -49,9 +49,7 @@ class Triumphant(commands.Cog, name='Triumphant'):
         posting_channel = await self.bot.fetch_channel(int(config['triumphant_config']["triumph_channel"]))
         for reaction in msg.reactions:
             async for user in reaction.users():
-                if user.id == self.bot.user.id:
-                    return
-                if payload.member.bot or payload.emoji != config['triumphant_config']['triumph_react']:
+                if user.id == self.bot.user.id and payload.emoji == config['triumphant_config']['triumph_react']:
                     return
         await msg.add_reaction(config['triumphant_config']['triumph_react'])
         results = []
@@ -135,6 +133,8 @@ class Triumphant(commands.Cog, name='Triumphant'):
         if os.path.isfile(f'assets/json/server/{guild.id}/triumphant.json'):
             with open(f'assets/json/server/{guild.id}/triumphant.json', 'r') as f:
                 users = json.load(f)
+        else:
+            users = {}
         if not msg.author.bot:
             users[str(msg.author.id)] = 1
         if msg.author.bot and not_bot_user:
@@ -142,14 +142,14 @@ class Triumphant(commands.Cog, name='Triumphant'):
         if msg.mentions:
             for member in id_list:
                 users[str(member)] = 1
-        with open(f'assets/json/server/{payload.guild_id}/triumphant.json', 'w') as f:
+        with open(f'config/{payload.guild_id}/triumphant.json', 'w') as f:
             json.dump(users, f)
 
     @commands.command(hidden=True)
     @has_permissions(manage_messages=True)
     async def triumph_delete(self, ctx, member_id: int):
         member = await ctx.guild.fetch_member(member_id=member_id)
-        with open(f'assets/json/server/{ctx.guild.id}/triumphant.json', 'r') as f:
+        with open(f'config/{ctx.guild.id}/triumphant.json', 'r') as f:
             users = json.load(f)
         try:
             if users[str(member_id)] == 1:
@@ -160,7 +160,7 @@ class Triumphant(commands.Cog, name='Triumphant'):
             del_embed.add_field(name="User Id:", value=f"{member_id}")
             await ctx.send(embed=del_embed)
             return
-        with open(f'assets/json/server/{ctx.guild.id}/triumphant.json', 'w+') as f:
+        with open(f'config/{ctx.guild.id}/triumphant.json', 'w+') as f:
             json.dump(users, f)
         await ctx.send(f"Succesfully deleted {member.name} from triumphant list. ID: {member_id}")
 
@@ -168,7 +168,7 @@ class Triumphant(commands.Cog, name='Triumphant'):
     @has_permissions(manage_messages=True)
     async def triumph_add(self, ctx, member_id: int):
         member = await ctx.guild.fetch_member(member_id=member_id)
-        with open(f'assets/json/server/{ctx.guild.id}/triumphant.json', 'r') as f:
+        with open(f'config/{ctx.guild.id}/triumphant.json', 'r') as f:
             users = json.load(f)
 
         try:
@@ -181,7 +181,7 @@ class Triumphant(commands.Cog, name='Triumphant'):
         except:
             users[str(member_id)] = 1
 
-        with open(f'assets/json/server/{ctx.guild.id}/triumphant.json', 'w') as f:
+        with open(f'config/{ctx.guild.id}/triumphant.json', 'w') as f:
             json.dump(users, f)
 
         add_embed = discord.Embed(title='User is now triumphant')
@@ -196,11 +196,11 @@ class Triumphant(commands.Cog, name='Triumphant'):
         user_list = ''
 
         if copy is None:
-            with open(f'assets/json/server/{ctx.guild.id}/triumphant.json', 'r') as f:
+            with open(f'config/{ctx.guild.id}/triumphant.json', 'r') as f:
                 users = json.load(f)
                 copy = ""
         if copy:
-            with open(f'assets/json/server/{ctx.guild.id}/triumphant_copy.json', 'r') as f:
+            with open(f'config/{ctx.guild.id}/triumphant_copy.json', 'r') as f:
                 users = json.load(f)
 
         for key in users:
@@ -216,14 +216,14 @@ class Triumphant(commands.Cog, name='Triumphant'):
     @commands.command(hidden=True)
     @has_permissions(manage_messages=True)
     async def give_triumphant(self, ctx):
-        with open(f'assets/json/config.json', 'r') as f:
+        with open(f'config/{ctx.guild.id}/config.json', 'r') as f:
             config = json.load(f)
-        triumphant_role = ctx.guild.get_role(int(config[str(ctx.guild.id)]['triumphrole']))
+        triumphant_role = ctx.guild.get_role(int(config['role_config']["triumphant"]))
 
         current_triumphant = list(triumphant_role.members)
         member_list = ""
 
-        with open(f'assets/json/server/{ctx.guild.id}/triumphant_copy.json', 'r') as f:
+        with open(f'config/{ctx.guild.id}/triumphant_copy.json', 'r') as f:
             users = json.load(f)
 
         for member in current_triumphant:
@@ -233,7 +233,7 @@ class Triumphant(commands.Cog, name='Triumphant'):
             user = ctx.channel.guild.get_member(user_id=int(key))
             member_list = member_list + user.name + '\n'
             await user.add_roles(triumphant_role)
-        os.remove(f'assets/json/server/{ctx.guild.id}/triumphant_copy.json')
+        os.remove(f'config/{ctx.guild.id}/triumphant_copy.json')
 
         triumph_embed = discord.Embed(title="Triumphant Role Success",
                                       description="These users have received their role.")
@@ -244,19 +244,19 @@ class Triumphant(commands.Cog, name='Triumphant'):
     async def triumphant_reset(self, server):
         if server.id == 811378282113138719:
             return
-        with open('assets/json/config.json', 'r') as f:
+        with open(f'config/{server.id}/config.json', 'r') as f:
             config = json.load(f)
-        chan = self.bot.get_channel(int(config[str(server.id)]['triumphant']))
+        chan = self.bot.get_channel(int(config['triumphant_config']["triumph_channel"]))
 
-        if os.path.isfile(f'assets/json/server/{str(server.id)}/triumphant_copy.json'):
-            os.remove(f'assets/json/server/{str(server.id)}/triumphant_copy.json')
-        with open(f'assets/json/server/{str(server.id)}/triumphant.json', 'r') as f:
+        if os.path.isfile(f'config/{server.id}/triumphant_copy.json'):
+            os.remove(f'config/{server.id}/triumphant_copy.json')
+        with open(f'config/{server.id}/triumphant_copy.json', 'r') as f:
             users = json.load(f)
 
-        with open(f'assets/json/server/{str(server.id)}/triumphant_copy.json', 'w') as f:
+        with open(f'config/{server.id}/triumphant_copy.json', 'w') as f:
             json.dump(users, f)
 
-        os.remove(f'assets/json/server/{str(server.id)}/triumphant.json')
+        os.remove(f'config/{server.id}/triumphant.json')
 
         triumphant = {}
 
