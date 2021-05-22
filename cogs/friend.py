@@ -51,7 +51,8 @@ class Friend(commands.Cog):
                   "https://media1.tenor.com/images/0e19c69eb1d0e6d58f1c8418b8232881/tenor.gif?itemid=15301397",
                   "https://media.tenor.com/images/11baf16c4029abc97bdae7ff3f6ffe3b/tenor.gif",
                   "https://media.giphy.com/media/rvxGjhW3TKVeo/source.gif",
-                  "https://i.gifer.com/RLil.gif"]
+                  "https://i.gifer.com/RLil.gif",
+                  "https://i.imgur.com/juYkVr8.jpg"]
         url = random.choice(images)
         embed = discord.Embed(color=0x00ff00)
         if member is not None:
@@ -65,6 +66,27 @@ class Friend(commands.Cog):
         embed.set_image(url=url)
         await ctx.channel.send(embed=embed)
 
+    @commands.command(description="For someone who needs sleep!")
+    async def terry(self, ctx):
+        """Terry Command"""
+        name = ""
+        images = ["https://i.imgur.com/rq4Om02.jpg", "https://i.imgur.com/9c5GchZ.jpg",
+                  "https://i.imgur.com/9c5GchZ.jpg", "https://i.imgur.com/4XYABRg.jpg",
+                  "https://i.imgur.com/VK0vDv8.jpg", "https://i.imgur.com/C4p4pmN.jpg",
+                  "https://i.imgur.com/AcwdkGU.jpg", "https://i.imgur.com/yiYEgmu.png",
+                  "https://i.imgur.com/8Wu8voN.jpg", "https://i.imgur.com/81e3EGg.jpg",
+                  "https://i.imgur.com/5hnKRzL.jpg", "https://i.imgur.com/zpYv6fT.jpg",
+                  "https://i.imgur.com/W5Pg7d3.png", "https://i.imgur.com/o14epCZ.png",
+                  "https://i.imgur.com/5YkAqrs.png", "https://i.imgur.com/sTFehUh.jpg",
+                  "https://i.imgur.com/MJu4EVZ.png", "https://i.imgur.com/XUTsIDg.png",
+                  "https://i.imgur.com/OjjwX4h.jpg", "https://i.imgur.com/2ITAMQ4.jpg"]
+        url = random.choice(images)
+        embed = discord.Embed(color=0x00ff00)
+
+        embed.title = f"You have summoned the one true god of thumbs!"
+        embed.description = ' '
+        embed.set_image(url=url)
+        await ctx.channel.send(embed=embed)
 
 def setup(bot):
     bot.add_cog(Friend(bot))

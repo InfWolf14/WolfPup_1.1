@@ -185,21 +185,38 @@ class Master(commands.Cog, name='Master'):
         if os.path.isfile(f'config/{ctx.guild.id}/config.json'):
             with open(f'config/{ctx.guild.id}/config.json', 'r') as f:
                 config = json.load(f)
-            if ctx.channel.id == config['channel_config']['config_channel']:
-                pending = await ctx.send(embed=discord.Embed(title='Rebuilding Database...'))
-                if member is None:
-                    self.db[str(ctx.guild.id)].drop_collection('users')
-                else:
-                    self.db[str(ctx.guild.id)]['users'].find_one_and_delete({'_id': member.id})
-                pending = await Level.build_level(Level(self.bot), ctx, member, pending)
-                pending = await Profile.build_profile(Profile(self.bot), ctx, member, pending)
-                pending = await Thank.build_thank(Thank(self.bot), ctx, member, pending)
-                if member is None:
-                    await pending.edit(embed=discord.Embed(title='Server Rebuild Complete',
-                                                           description=f'Server ID: {str(ctx.guild.id)}'))
-                else:
-                    await pending.edit(embed=discord.Embed(title='User Rebuild Complete',
-                                                           description=f'User ID: {str(member.id)}'))
+            try:
+                if ctx.id == config['channel_config']['config_channel']:
+                    pending = await ctx.send(embed=discord.Embed(title='Rebuilding Database...'))
+                    if member is None:
+                        self.db[str(ctx.guild.id)].drop_collection('users')
+                    else:
+                        self.db[str(ctx.guild.id)]['users'].find_one_and_delete({'_id': member.id})
+                    pending = await Level.build_level(Level(self.bot), ctx, member, pending)
+                    pending = await Profile.build_profile(Profile(self.bot), ctx, member, pending)
+                    pending = await Thank.build_thank(Thank(self.bot), ctx, member, pending)
+                    if member is None:
+                        await pending.edit(embed=discord.Embed(title='Server Rebuild Complete',
+                                                               description=f'Server ID: {str(ctx.guild.id)}'))
+                    else:
+                        await pending.edit(embed=discord.Embed(title='User Rebuild Complete',description=f'User ID: {str(member.id)}'))
+                    return
+            except:
+                if ctx.channel.id == config['channel_config']['config_channel']:
+                    pending = await ctx.send(embed=discord.Embed(title='Rebuilding Database...'))
+                    if member is None:
+                        self.db[str(ctx.guild.id)].drop_collection('users')
+                    else:
+                        self.db[str(ctx.guild.id)]['users'].find_one_and_delete({'_id': member.id})
+                    pending = await Level.build_level(Level(self.bot), ctx, member, pending)
+                    pending = await Profile.build_profile(Profile(self.bot), ctx, member, pending)
+                    pending = await Thank.build_thank(Thank(self.bot), ctx, member, pending)
+                    if member is None:
+                        await pending.edit(embed=discord.Embed(title='Server Rebuild Complete',
+                                                               description=f'Server ID: {str(ctx.guild.id)}'))
+                    else:
+                        await pending.edit(embed=discord.Embed(title='User Rebuild Complete',
+                                                               description=f'User ID: {str(member.id)}'))
 
 
 def setup(bot):

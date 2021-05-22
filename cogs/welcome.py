@@ -33,8 +33,19 @@ class Welcome(commands.Cog):
         await welcome_channel.send(random.choice(welcome_messages))
         welcome_embed = discord.Embed(title="Member joined", description=f'{member} has joined.')
         welcome_embed.add_field(name="ID:", value=f"{member.id}", inline=True)
-        created = member.created_at.strftime("%b %d, %Y")
-        welcome_embed.add_field(name="Created on:", value=f"{created}", inline=True)
+        created = datetime.datetime.utcnow() - member.created_at
+        days = created.days
+        years = 0
+        if days > 365:
+            years = int(days / 365)
+            days = int(days - (years * 365))
+        if days < 5:
+            welcome_embed.add_field(name="**New Account!**", value=" ")
+        seconds = created.seconds
+        hours = int(seconds / 3600)
+        minutes = int((seconds - (hours * 3600)) / 60)
+        seconds = int(seconds - ((hours * 3600) + (minutes * 60)))
+        welcome_embed.add_field(name="Created:", value=f"{years} years, {days} days, {hours} hours, {minutes} minutes, {seconds} seconds ago", inline=True)
         welcome_embed.set_thumbnail(url=member.avatar_url)
         welcome_embed.timestamp = datetime.datetime.utcnow()
         i = 0
@@ -47,14 +58,23 @@ class Welcome(commands.Cog):
 
     @commands.Cog.listener()
     async def on_member_remove(self, member):
-        with open('assets/json/config.json', 'r') as f:
+        with open(f'config/{member.guild.id}/config.json', 'r') as f:
             config = json.load(f)
         config_channel = self.bot.get_channel(config['channel_config']['config_channel'])
         leave_embed = discord.Embed(title="Member left", description=f'{member} has left')
         leave_embed.add_field(name="Nick: ", value=f"{member.nick}", inline=True)
         leave_embed.add_field(name="ID:", value=f"{member.id}", inline=True)
-        joined = member.joined_at.strftime("%b %d, %Y")
-        leave_embed.add_field(name="Joined on:", value=f"{joined}")
+        joined = datetime.datetime.utcnow() - member.joined_at
+        days = joined.days
+        years = 0
+        if days > 365:
+            years = int(days / 365)
+            days = int(days - (years * 365))
+        seconds = joined.seconds
+        hours = int(seconds / 3600)
+        minutes = int((seconds - (hours * 3600)) / 60)
+        seconds = int(seconds - ((hours * 3600) + (minutes * 60)))
+        leave_embed.add_field(name="Joined on:", value=f"{years} years, {days} days, {hours} hours, {minutes} minutes, {seconds} seconds ago")
         mentions = [role.mention for role in member.roles if role.name != '@everyone']
         if not mentions:
             mentions = 'N/A'
