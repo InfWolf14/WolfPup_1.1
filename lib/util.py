@@ -54,6 +54,9 @@ class Util:
                 'modlog_channel': ctx.channel.id,
                 'rolepost_channel': ctx.channel.id,
                 'welcome_channel': ctx.channel.id,
+                'wishwall': ctx.channel.id,
+                'ironworks': ctx.channel.id,
+                'cactpot': ctx.channel.id,
                 'bot_channels': [],
                 'exp_blacklist': []
             },
@@ -69,6 +72,7 @@ class Util:
                 'most_thankful': None,
                 'triumphant': None,
                 'birthday': None,
+                'cactpot': None,
                 'top_5_blacklist': []
             }
         }

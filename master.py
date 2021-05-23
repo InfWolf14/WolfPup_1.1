@@ -83,8 +83,11 @@ class Master(commands.Cog, name='Master'):
             try:
                 value = await commands.EmojiConverter().convert(ctx, value)
             except (TypeError, commands.errors.EmojiNotFound): pass
-            if value.isdigit():
-                value = int(value)
+            try:
+                if value.isdigit():
+                    value = int(value)
+            except AttributeError:
+                pass
             try:
                 if isinstance(config[cfg][setting], list):
                     if delete == '-r':

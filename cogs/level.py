@@ -63,10 +63,13 @@ class Level(commands.Cog, name='Level'):
                                             '/terry_coin.png')
                 if member != ctx.author:
                     new_embed.title = 'You\'ve given your bonus to your friend!'
-                if (user['flags']['daily_stamp']+dt.timedelta(hours=36)) < dt.datetime.utcnow():
-                    new_embed.description = f'This is day {streak}. You missed your streak window...'
-                    self.server_db.find_one_and_update({'_id': str(ctx.author.id)}, {'$set': {'exp_streak': 0}})
-                    streak -= 1
+                try:
+                    if (user['flags']['daily_stamp']+dt.timedelta(hours=36)) < dt.datetime.utcnow():
+                        new_embed.description = f'This is day {streak}. You missed your streak window...'
+                        self.server_db.find_one_and_update({'_id': str(ctx.author.id)}, {'$set': {'exp_streak': 0}})
+                        streak -= 1
+                except TypeError:
+                    pass
                 else:
                     if streak >= 5:
                         new_embed.description = '__BONUS__ This is your 5-day streak! __BONUS__'
@@ -122,7 +125,8 @@ class Level(commands.Cog, name='Level'):
             for x in range(5):
                 if guild.get_role(config['role_config'][f'level_{x+1}']) in member.roles:
                     await member.remove_roles(guild.get_role(config['role_config'][f'level_{x+1}']))
-            await member.add_roles(guild.get_role(config['role_config'][f'level_{user["level"]}']))
+            if user["level"] > 1:
+                await member.add_roles(guild.get_role(config['role_config'][f'level_{user["level"]}']))
         await self.generate_top_5(guild.id)
         return user['level'], user['exp']
 
@@ -138,6 +142,9 @@ class Level(commands.Cog, name='Level'):
             top_5.append(int(user['_id']))
         for member in guild.members:
             if member.id in top_5 and guild.get_role(config['role_config']['top_5']) not in member.roles:
+                for role in member.roles:
+                    if role.id in config['role_config']['top_5_blacklist']:
+                        continue
                 await member.add_roles(guild.get_role(config['role_config']['top_5']))
             elif member.id not in top_5 and guild.get_role(config['role_config']['top_5']) in member.roles:
                 await member.remove_roles(guild.get_role(config['role_config']['top_5']))

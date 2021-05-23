@@ -9,6 +9,7 @@ from master import Master
 from lib.util import Util
 from lib.mongo import Mongo
 from cogs.level import Level
+from cogs.triumphant import Triumphant
 
 
 def get_prefix(bot, message):
@@ -22,7 +23,8 @@ def get_prefix(bot, message):
 
 
 initial_cogs = ['master', 'cogs.mod', 'cogs.welcome',
-                'cogs.level', 'cogs.profile', 'cogs.thank', 'cogs.leaderboard']
+                'cogs.level', 'cogs.profile', 'cogs.thank', 'cogs.leaderboard', 'cogs.friend',
+                'cogs.games', 'cogs.roles', 'cogs.starboard', 'cogs.timer', 'cogs.triumphant']
 intents = discord.Intents.default()
 intents.members = True
 intents.messages = True
@@ -63,15 +65,16 @@ async def weekly():
             except discord.errors.NotFound:
                 return
             # Weekly Reset Functions Here
+            await Triumphant.triumphant_reset(Triumphant(bot), guild)
             await config_channel.send(embed=discord.Embed(title=f'{config_channel.guild.name} Weekly Reset!'))
 
 async def cactpot():
     """Cactpot Reminder"""
     for server in bot.guilds:
-        with open(f'assets/json/config.json', 'r') as f:
+        with open(f'config/{str(server.id)}/config.json', 'r') as f:
             config = json.load(f)
-        role = server.get_role(int(config[str(server.id)]['cactrole']))
-        channel = bot.get_channel(int(config[str(server.id)['cactpot']]))
+        role = server.get_role(int(config['role_config']['cactpot']))
+        channel = bot.get_channel(int(config['channel_config']['cactpot']))
         if not role or not channel:
             return
         embed = discord.Embed(title='**The JumboCactPot has been drawn!**', description="Don't forget to check your "

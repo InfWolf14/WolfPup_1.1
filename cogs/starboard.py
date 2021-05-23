@@ -39,7 +39,11 @@ class Starboard(commands.Cog, name='Starboard'):
             channel = self.bot.get_channel(payload.channel_id)
             starboard_channel = self.bot.get_channel(config['starboard_config']['starboard_channel'])
             message = await channel.fetch_message(payload.message_id)
-            reaction = discord.utils.get(message.reactions, emoji=self.bot.get_emoji(payload.emoji.id))
+            for react in message.reactions:
+                if react.emoji == config['starboard_config']['star_react']:
+                    reaction = react
+                    break
+            # reaction = discord.utils.get(message.reactions, emoji=self.bot.get_emoji(payload.emoji.id))
             if channel.id != starboard_channel.id:
                 already_posted = discord.utils.get(message.reactions, emoji=config['starboard_config']['starred_react'])
                 if payload.emoji.name == config['starboard_config']['star_react']:

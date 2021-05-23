@@ -20,7 +20,7 @@ class Profile(commands.Cog):
                             'xiv': {'ffxiv', 'xiv', 'ff'}}
 
     @commands.command(name='build_profile', hidden=True, aliases=['rebuild_profile'])
-    @commands.has_guild_permissions(administrator=True)
+    @commands.is_owner()
     async def build_profile(self, ctx, member: discord.Member = None, pending=None):
         self.server_db = self.db[str(ctx.guild.id)]['users']
         if pending:
@@ -132,7 +132,7 @@ class Profile(commands.Cog):
     async def profile(self, ctx, member: discord.Member = None):
         """Displays your profile card."""
         self.server_db = self.db[str(ctx.guild.id)]['users']
-        print('\n')
+        print('in')
         if await Util.check_channel(ctx):
             if member is None:
                 member = ctx.author
@@ -141,8 +141,8 @@ class Profile(commands.Cog):
                 bg_img = Image.open('assets/card_to_draw.png').convert('RGBA')
                 ref_img = bg_img.copy()
                 draw = ImageDraw.Draw(ref_img)
-                title_font = ImageFont.truetype('assets/font/NASHVILL.ttf', size=42)
-                text_font = ImageFont.truetype('assets/font/HELLDORA.ttf', size=22)
+                title_font = ImageFont.truetype('assets/font/NASHVILL.TTF', size=42)
+                text_font = ImageFont.truetype('assets/font/HELLDORA.TTF', size=22)
                 alias_font = ImageFont.truetype('assets/font/libel_suit.ttf', size=20)
                 buffer = 20
                 draw_bounds = [buffer, (ref_img.width-buffer), buffer, (ref_img.height-buffer)]
@@ -232,7 +232,7 @@ class Profile(commands.Cog):
                 wanted_text = user['profile']['wanted_text']
                 if wanted_text is None:
                     wanted_text = 'Shootin\', lootin\', and rootin\' tootin\' degeneracy'
-                text_font = ImageFont.truetype('assets/font/HELLDORA.ttf', size=17)
+                text_font = ImageFont.truetype('assets/font/HELLDORA.TTF', size=17)
                 text_size = draw.textsize(text=wanted_text, font=text_font)
                 draw.text((ref_coord[0]+int(buffer/4), ref_coord[1]+text_size[1]-2),
                           text=wanted_text, fill=(48, 48, 48), font=text_font)

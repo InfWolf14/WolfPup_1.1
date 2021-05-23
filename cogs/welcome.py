@@ -14,7 +14,7 @@ class Welcome(commands.Cog):
         with open(f'config/{member.guild.id}/config.json', 'r') as f:
             config = json.load(f)
         welcome_channel = self.bot.get_channel(config['channel_config']['welcome_channel'])
-        config_channel = self.bot.get_channel(config['channel_config']['config_channel'])
+        config_channel = self.bot.get_channel(config['channel_config']['welcome_channel'])
         ment = member.mention
         welcome_messages = [
             f"\U0001f4e2 \U0000269f Say hello to {ment}!",

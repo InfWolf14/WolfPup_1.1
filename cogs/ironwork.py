@@ -1,18 +1,33 @@
-import asyncio
+import os
 import json
+import asyncio
 from datetime import datetime
-
 import discord
 from discord.ext import commands
 
 
-class IronWorks(commands.Cog, name='IronWorks'):
+class IronWorks(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+        self.prefix = ''
         self.url = 'https://cdn.discordapp.com/attachments/532380077896237061/786762838789849139/Cid_ARR.jpg'
-        self.prefix: str = ''
 
-    @staticmethod
+    @commands.command(name='init_ironworks', hidden=True, aliases=['init_iw', 'iw_init'])
+    @commands.is_owner()
+    async def init_ironworks(self, ctx):
+        if os.path.isfile(f'config/{ctx.guild.id}/config.json'):
+            with open(f'config/{ctx.guild.id}/config.json', 'r') as f:
+                config = json.load(f)
+            ironworks_config = {
+                'ironworks_channel': ctx.channel.id,
+                'conf_react': None,
+                'decl_react': None
+            }
+            config['ironworks_config'] = ironworks_config
+            with open(f'config/{ctx.guild.id}/config.json', 'w') as f:
+                json.dump(config, f, indent=2)
+            await ctx.send(embed=discord.Embed(title=f'Ironworks config initialized'))
+
     async def build_embed(self, old_embed: discord.Embed = None, author: str = None, description: str = None,
                           add: discord.Member = None, remove: discord.Member = None,
                           error: bool = False, error_type: int = 0):
@@ -62,7 +77,6 @@ class IronWorks(commands.Cog, name='IronWorks'):
                                          f'*Please contact staff for assistance.*')
         return new_embed
 
-    @staticmethod
     async def build_embed_reacts(self, message, config):
         if message.reactions:
             for react in message.reactions:
@@ -70,99 +84,94 @@ class IronWorks(commands.Cog, name='IronWorks'):
                     if not user == self.bot.user:
                         await react.remove(user)
         else:
-            await discord.Message.add_reaction(message, config['accept_emoji'])
-            await discord.Message.add_reaction(message, config['un-accept_emoji'])
+            await discord.Message.add_reaction(message, config['conf_react'])
+            await discord.Message.add_reaction(message, config['decl_react'])
 
     @commands.command(aliases=['comm'], description="Use this to commission in #xiv-ironworks")
     async def commission(self, ctx, *args):
         """This command allows you to make commissions and connect you to crafters,
         gatherers, etc. to help complete requests!"""
         self.prefix = ctx.prefix
-        guild = ctx.guild.id
         channel = await self.bot.fetch_channel(ctx.channel.id)
-        author = ctx.message.author
         comm_desc = ' '.join(args)
-        with open('assets/json/config.json', 'r') as f:
-            config = json.load(f)
+        if os.path.isfile(f'config/{str(ctx.guild.id)}/config.json'):
+            with open(f'config/{str(ctx.guild.id)}/config.json', 'r') as f:
+                config = json.load(f)
         try:
-            config = config[str(guild)]['ironworks']
+            config = config['ironworks_config']
         except KeyError:
-            sent = await channel.send(embed=(await self.build_embed(self, error=True, error_type=1)))
+            sent = await channel.send(embed=(await self.build_embed(error=True, error_type=1)))
             await asyncio.sleep(5)
             await sent.delete()
             return
-        if channel.id == config['channel']:
-            if author.nick:
-                comm_owner = str(author.nick)
+        if channel.id == config['ironworks_channel']:
+            if ctx.message.author.nick:
+                comm_owner = str(ctx.message.author.nick)
             else:
-                comm_owner = str(author)[:-5]
+                comm_owner = str(ctx.message.author)[:-5]
             if len(comm_desc) == 0:
-                sent = await channel.send(embed=(await self.build_embed(self, error=True, error_type=2)))
+                sent = await channel.send(embed=(await self.build_embed(error=True, error_type=2)))
                 await asyncio.sleep(5)
                 await sent.delete()
             else:
-                await channel.send(embed=(await self.build_embed(self, author=comm_owner, description=comm_desc)))
+                await channel.send(embed=(await self.build_embed(author=comm_owner, description=comm_desc)))
 
     @commands.Cog.listener()
     async def on_message(self, ctx):
-        if isinstance(ctx.channel, discord.DMChannel):
-            return
-        guild = ctx.guild.id
         channel = await self.bot.fetch_channel(ctx.channel.id)
-        message = ctx
-        author = message.author
-        with open('assets/json/config.json', 'r') as f:
-            config = json.load(f)
+        if os.path.isfile(f'config/{str(ctx.guild.id)}/config.json'):
+            with open(f'config/{str(ctx.guild.id)}/config.json', 'r') as f:
+                config = json.load(f)
         try:
-            config = config[str(guild)]['ironworks']
+            config = config['ironworks_config']
         except KeyError:
-            sent = await channel.send(embed=(await self.build_embed(self, error=True, error_type=1)))
+            sent = await channel.send(embed=(await self.build_embed(error=True, error_type=1)))
             await asyncio.sleep(5)
             await sent.delete()
             return
-        if channel.id == config['channel']:
-            if author == self.bot.user:
-                if 'Error' in message.embeds[0].title:
+        if channel.id == config['ironworks_channel']:
+            if ctx.author == self.bot.user:
+                if 'Error' in ctx.embeds[0].title:
                     return
-                await self.build_embed_reacts(self, message, config)
+                await self.build_embed_reacts(ctx, config)
                 return
-            elif author.permissions_in(channel).manage_messages and author != self.bot.user:
-                if f'{self.prefix}comm' not in str(message.content)[:6]:
+            elif ctx.author.permissions_in(channel).manage_messages and ctx.author != self.bot.user:
+                if f'{self.prefix}comm' not in str(ctx.content)[:6]:
                     return
-            await discord.Message.delete(message)
+            await discord.Message.delete(ctx)
 
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, ctx):
         payload = ctx
-        guild = payload.guild_id
         channel = await self.bot.fetch_channel(payload.channel_id)
         message = await channel.fetch_message(payload.message_id)
         member = await channel.guild.fetch_member(payload.user_id)
-        with open('assets/json/config.json', 'r') as f:
-            config = json.load(f)
+        if os.path.isfile(f'config/{str(ctx.guild_id)}/config.json'):
+            with open(f'config/{str(ctx.guild_id)}/config.json', 'r') as f:
+                config = json.load(f)
         try:
-            config = config[str(guild)]['ironworks']
+            config = config['ironworks_config']
         except KeyError:
-            sent = await channel.send(embed=(await self.build_embed(self, error=True, error_type=1)))
+            sent = await channel.send(embed=(await self.build_embed(error=True, error_type=1)))
             await asyncio.sleep(5)
             await sent.delete()
             return
-        if channel.id == config['channel'] and message.author == self.bot.user and not member == self.bot.user and \
+        if channel.id == config['ironworks_channel'] and message.author == self.bot.user and not member == self.bot.user and \
                 message.embeds[0]:
             comm_owner = message.embeds[0].footer.text
             react_user = member.name
             if member.nick:
                 react_user = member.nick
             if react_user not in comm_owner:
-                if str(payload.emoji) == config['accept_emoji']:
-                    await message.edit(embed=(await self.build_embed(self, old_embed=message.embeds[0], add=member)))
-                elif str(payload.emoji) == config['un-accept_emoji']:
-                    await message.edit(embed=(await self.build_embed(self, old_embed=message.embeds[0], remove=member)))
+                if str(payload.emoji.name) == config['conf_react']:
+                    await message.edit(embed=(await self.build_embed(old_embed=message.embeds[0], add=member)))
+                elif str(payload.emoji.name) == config['decl_react']:
+                    await message.edit(embed=(await self.build_embed(old_embed=message.embeds[0], remove=member)))
             elif react_user in message.embeds[0].footer.text:
-                if str(payload.emoji) == config['un-accept_emoji']:
+                if str(payload.emoji.name) == config['decl_react']:
                     await discord.Message.delete(message)
                     return
-            await self.build_embed_reacts(self, message, config)
+            await self.build_embed_reacts(message, config)
 
 
 def setup(bot):

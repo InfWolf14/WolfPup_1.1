@@ -13,7 +13,7 @@ class Thank(commands.Cog):
         self.server_db = None
 
     @commands.command(name='build_thank', hidden=True, aliases=['rebuild_thank'])
-    @commands.has_guild_permissions(administrator=True)
+    @commands.is_owner()
     async def build_thank(self, ctx, member: discord.Member = None, pending=None):
         self.server_db = self.db[str(ctx.guild.id)]['users']
         if pending:
