@@ -15,54 +15,55 @@ class Leaderboard(commands.Cog):
 
     @commands.command(name='leaderboard', aliases=['lb'])
     async def leaderboard(self, ctx, *args):
-        await ctx.message.delete()
-        self.server_db = self.db[str(ctx.guild.id)]['users']
-        leaderboard = None
-        if args:
-            leaderboard = ' '.join(args)
-        if await Util.check_channel(ctx):
-            new_embed = discord.Embed(title=f':trophy: __**User Leaderboards**__ :trophy:',
-                                      color=discord.Colour.gold())
-            new_embed.set_author(name=ctx.guild.name, icon_url=ctx.guild.icon_url)
-            new_embed.set_footer(text=f'Results provided by: {self.bot.user.name}', icon_url=self.bot.user.avatar_url)
-            for stat in self.leaderboards:
-                if leaderboard is not None:
-                    if leaderboard in self.leaderboards[stat]:
-                        leaderboard = stat
-                    else:
-                        continue
-                users = self.server_db.find().sort(stat, -1)
-                rank = 1
-                listing, list_user, f_name, user_str = '', '', '', ''
-                stat_1, stat_2, my_stat = None, None, None
-                for user in users:
-                    try:
-                        list_user = self.bot.get_user(int(user["_id"]))
-
-                        try:
-                            stat_1, stat_2 = stat.split('.')
-                        except ValueError:
-                            pass
-                        if stat_2 is not None:
-                            f_name = f'**{stat_2.capitalize().replace("_", " ")}**'
-                            user_str = f'`[{str(rank)}.]` *{list_user.name} :* **{user[stat_1][stat_2]}**'
+        async with ctx.channel.typing():
+            await ctx.message.delete()
+            self.server_db = self.db[str(ctx.guild.id)]['users']
+            leaderboard = None
+            if args:
+                leaderboard = ' '.join(args)
+            if await Util.check_channel(ctx):
+                new_embed = discord.Embed(title=f':trophy: __**User Leaderboards**__ :trophy:',
+                                          color=discord.Colour.gold())
+                new_embed.set_author(name=ctx.guild.name, icon_url=ctx.guild.icon_url)
+                new_embed.set_footer(text=f'Results provided by: {self.bot.user.name}', icon_url=self.bot.user.avatar_url)
+                for stat in self.leaderboards:
+                    if leaderboard is not None:
+                        if leaderboard in self.leaderboards[stat]:
+                            leaderboard = stat
                         else:
-                            f_name = f'**{stat.capitalize()}**'
-                            user_str = f'`[{str(rank)}.]` *{list_user.name} :* **{user[stat]}**'
-                        if list_user == ctx.author:
-                            my_stat = user_str
-                            user_str = f'**\u27A4** {user_str} '
-                        if rank <= 15:
-                            listing += f'{user_str}\n'
-                            rank += 1
-                    except AttributeError:
-                        continue
-                if my_stat is not None:
-                    listing += f'\n__**Your Ranking:**__\n{my_stat}'
-                new_embed.add_field(name=f_name,
-                                    value=listing,
-                                    inline=True)
-            await ctx.send(embed=new_embed)
+                            continue
+                    users = self.server_db.find().sort(stat, -1)
+                    rank = 1
+                    listing, list_user, f_name, user_str = '', '', '', ''
+                    stat_1, stat_2, my_stat = None, None, None
+                    for user in users:
+                        try:
+                            list_user = self.bot.get_user(int(user["_id"]))
+
+                            try:
+                                stat_1, stat_2 = stat.split('.')
+                            except ValueError:
+                                pass
+                            if stat_2 is not None:
+                                f_name = f'**{stat_2.capitalize().replace("_", " ")}**'
+                                user_str = f'`[{str(rank)}.]` *{list_user.name} :* **{user[stat_1][stat_2]}**'
+                            else:
+                                f_name = f'**{stat.capitalize()}**'
+                                user_str = f'`[{str(rank)}.]` *{list_user.name} :* **{user[stat]}**'
+                            if list_user == ctx.author:
+                                my_stat = user_str
+                                user_str = f'**\u27A4** {user_str} '
+                            if rank <= 15:
+                                listing += f'{user_str}\n'
+                                rank += 1
+                        except AttributeError:
+                            continue
+                    if my_stat is not None:
+                        listing += f'\n__**Your Ranking:**__\n{my_stat}'
+                    new_embed.add_field(name=f_name,
+                                        value=listing,
+                                        inline=True)
+                await ctx.send(embed=new_embed)
 
 
 def setup(bot):
