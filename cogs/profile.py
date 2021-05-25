@@ -234,7 +234,7 @@ class Profile(commands.Cog):
                     wanted_text = user['profile']['wanted_text']
                     if wanted_text is None:
                         wanted_text = 'Shootin\', lootin\', and rootin\' tootin\' degeneracy'
-                    text_font = ImageFont.truetype('assets/font/HELLDORA.TTF', size=17)
+                    text_font = ImageFont.truetype('assets/font/libel_suit.ttf', size=19)
                     text_size = draw.textsize(text=wanted_text, font=text_font)
                     draw.text((ref_coord[0]+int(buffer/4), ref_coord[1]+text_size[1]-2),
                               text=wanted_text, fill=(48, 48, 48), font=text_font)
