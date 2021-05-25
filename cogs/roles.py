@@ -65,7 +65,7 @@ class RolesCog(commands.Cog, name='roles'):
 
 
     @commands.command(hidden=True)
-    @has_permissions(administrator=True)
+    @commands.is_owner()
     async def set_role(self, ctx, role: discord.Role, message: int, emoji: discord.Emoji):
         try:
             print(emoji)
@@ -79,8 +79,7 @@ class RolesCog(commands.Cog, name='roles'):
             await ctx.send(emoji)
         except EmojiNotFound:
             await ctx.send("Error with the Emoji.", delete_after=6)
-        except:
-            await ctx.send("Something went wrong.", delete_after=6)
+
 
     @commands.command(hidden=True)
     @has_permissions(administrator=True)

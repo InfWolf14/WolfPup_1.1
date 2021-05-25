@@ -57,6 +57,7 @@ class Util:
                 'wishwall': ctx.channel.id,
                 'ironworks': ctx.channel.id,
                 'cactpot': ctx.channel.id,
+                'lounge': ctx.channel.id,
                 'bot_channels': [],
                 'exp_blacklist': []
             },

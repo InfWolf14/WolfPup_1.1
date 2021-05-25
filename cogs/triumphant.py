@@ -39,7 +39,8 @@ class Triumphant(commands.Cog, name='Triumphant'):
         if os.path.isfile(f'config/{str(payload.guild_id)}/config.json'):
             with open(f'config/{str(payload.guild_id)}/config.json', 'r') as f:
                 config = json.load(f)
-        if payload.emoji != config['triumphant_config']['triumph_react']:
+
+        if str(payload.emoji) not in config['triumphant_config']['triumph_react']:
             return
         self.server_db = self.db[str(payload.guild_id)]['users']
         guild = await self.bot.fetch_guild(payload.guild_id)

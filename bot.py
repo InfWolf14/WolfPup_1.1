@@ -122,52 +122,6 @@ async def on_member_leave(member):
 
 
 @bot.event
-async def on_command_error(ctx, e):
-    config_channel = None
-    if os.path.isfile(f'config/{str(ctx.guild.id)}/config.json'):
-        with open(f'config/{str(ctx.guild.id)}/config.json', 'r') as f:
-            config = json.load(f)
-        config_channel = await bot.fetch_channel(config['channel_config']['config_channel'])
-    new_embed = discord.Embed(title=f'**[Error]** {type(e).__name__} **[Error]**')
-    try:
-        new_embed.description = f'Message: \"*{ctx.message.content}*\"'
-        await ctx.message.delete()
-    except discord.errors.NotFound:
-        pass
-    new_embed.add_field(name='Traceback Information:', value=''.join(tb.format_exception_only(type(e), e)).replace(':', ':\n'))
-    new_embed.set_footer(text=f'Use: [ {ctx.prefix}help ] for assistance')
-    if config_channel is not None:
-        error = await config_channel.send(embed=new_embed)
-    else:
-        error = await ctx.send(embed=new_embed)
-    # await asyncio.sleep(30)
-    # await error.delete()
-
-
-@bot.event
-async def on_error(ctx, e):
-    config_channel = None
-    if os.path.isfile(f'config/{str(ctx.guild.id)}/config.json'):
-        with open(f'config/{str(ctx.guild.id)}/config.json', 'r') as f:
-            config = json.load(f)
-        config_channel = await bot.fetch_channel(config['channel_config']['config_channel'])
-    new_embed = discord.Embed(title=f'**[Error]** {type(e).__name__} **[Error]**')
-    try:
-        new_embed.description = f'Message: \"*{ctx.message.content}*\"'
-        await ctx.message.delete()
-    except discord.errors.NotFound:
-        pass
-    new_embed.add_field(name='Traceback Information:', value=''.join(tb.format_exception_only(type(e), e)).replace(':', ':\n'))
-    new_embed.set_footer(text=f'Use: [ {ctx.prefix}help ] for assistance')
-    if config_channel is not None:
-        error = await config_channel.send(embed=new_embed)
-    else:
-        error = await ctx.send(embed=new_embed)
-    # await asyncio.sleep(30)
-    # await error.delete()
-
-
-@bot.event
 async def on_ready():
     print(f'\nLogged in as: {bot.user.name} - {bot.user.id}\nVersion: {discord.__version__}')
     print(f'Successfully logged in and booted...!')
