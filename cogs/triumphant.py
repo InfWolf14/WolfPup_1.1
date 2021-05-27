@@ -52,7 +52,7 @@ class Triumphant(commands.Cog, name='Triumphant'):
         posting_channel = await self.bot.fetch_channel(int(config['triumphant_config']["triumph_channel"]))
         for reaction in msg.reactions:
             async for user in reaction.users():
-                if user.id == self.bot.user.id and payload.emoji == config['triumphant_config']['triumph_react']:
+                if user.id == self.bot.user.id and str(payload.emoji) in config['triumphant_config']['triumph_react']:
                     return
         await msg.add_reaction(config['triumphant_config']['triumph_react'])
         results = []

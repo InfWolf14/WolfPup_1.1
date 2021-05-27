@@ -198,6 +198,7 @@ class Master(commands.Cog, name='Master'):
                     pending = await Level.build_level(Level(self.bot), ctx, member, pending)
                     pending = await Profile.build_profile(Profile(self.bot), ctx, member, pending)
                     pending = await Thank.build_thank(Thank(self.bot), ctx, member, pending)
+                    pending = await Level.build_bday(Level(self.bot), ctx, member, pending)
                     if member is None:
                         await pending.edit(embed=discord.Embed(title='Server Rebuild Complete',
                                                                description=f'Server ID: {str(ctx.guild.id)}'))

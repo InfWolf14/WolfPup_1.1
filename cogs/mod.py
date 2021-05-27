@@ -1,13 +1,21 @@
 import json
+import os
+
 import discord
 from discord.ext import commands
 import datetime as dt
+
+from discord.ext.commands import has_permissions
+
+from lib.mongo import Mongo
 from lib.util import Util
 
 
 class Mod(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+        self.db = Mongo.init_db(Mongo())
+        self.server_db = None
 
     @commands.command()
     @commands.guild_only()
@@ -143,6 +151,38 @@ class Mod(commands.Cog):
         except (AttributeError, discord.errors.HTTPException):
             return
 
+    @staticmethod
+    async def award_monthly_roles(self, guild):
+        if os.path.isfile(f'config/{guild.id}/config.json'):
+            with open(f'config/{guild.id}/config.json', 'r') as f:
+                config = json.load(f)
+            winners = []
+            self.server_db = self.db[str(guild.id)]['users']
+            channel = self.bot.get_channel(config['channel_config']['config_channel'])
+            most_wanted = self.server_db.find().sort('exp', -1)
+            most_thanked = self.server_db.find().sort('thanks.thanks_received', -1)
+            most_thankful = self.server_db.find().sort('thanks.thanks_given', -1)
+            new_embed = discord.Embed(title=f'This Month\'s Ultimate Outlaws!',
+                                      description=f'Give it up for this month\'s winners!')
+            for user in most_wanted:
+                user_id = self.bot.get_user(int(user["_id"]))
+                if user_id not in winners:
+                    winners.append(user_id)
+                    new_embed.add_field(name='Most Wanted!', value=f'{winners[0]}')
+                    break
+            for user in most_thanked:
+                user_id = self.bot.get_user(int(user["_id"]))
+                if user_id not in winners:
+                    winners.append(user_id)
+                    new_embed.add_field(name='Most Thanked!', value=f'{winners[1]}')
+                    break
+            for user in most_thankful:
+                user_id = self.bot.get_user(int(user["_id"]))
+                if user_id not in winners:
+                    winners.append(user_id)
+                    new_embed.add_field(name='Most Thankful!', value=f'{winners[2]}')
+                    break
+            await channel.send(embed=new_embed)
 
 def setup(bot):
     bot.add_cog(Mod(bot))

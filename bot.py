@@ -10,6 +10,7 @@ from lib.util import Util
 from lib.mongo import Mongo
 from cogs.level import Level
 from cogs.triumphant import Triumphant
+from cogs.mod import Mod
 
 
 def get_prefix(bot, message):
@@ -50,6 +51,7 @@ async def daily():
                 return
             # Daily Reset Functions Here
             await Util.reset_user_flags(Util(), config_channel)
+            await Level.daily_bday_reset(Level(bot), guild)
             await config_channel.send(embed=discord.Embed(title=f'{config_channel.guild.name} Daily Reset!'))
 
 
@@ -101,6 +103,7 @@ async def monthly():
                 return
             # Monthly Reset Functions Here
             await Level.build_level(Level(bot), config_channel)
+            await Mod.award_monthly_roles(Mod(bot), guild)
             await config_channel.send(embed=discord.Embed(title=f'{config_channel.guild.name} Monthly Reset!'))
 
 

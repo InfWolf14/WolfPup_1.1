@@ -5,6 +5,7 @@ import asyncio
 from math import sqrt, floor
 import datetime as dt
 import discord
+from discord import Forbidden
 from discord.ext import commands
 from lib.util import Util
 from lib.mongo import Mongo
@@ -151,6 +152,95 @@ class Level(commands.Cog, name='Level'):
                 await member.add_roles(guild.get_role(config['role_config']['top_5']))
             elif member.id not in top_5 and guild.get_role(config['role_config']['top_5']) in member.roles:
                 await member.remove_roles(guild.get_role(config['role_config']['top_5']))
+
+    @commands.command(name='build_bday', hidden=True, aliases = ['rebuild_bday'])
+    @commands.is_owner()
+    async def build_bday(self, ctx, member: discord.Member = None, pending=None):
+
+        self.server_db = self.db[str(ctx.guild.id)]['users']
+        if pending:
+            await pending.edit(embed=discord.Embed(title='Rebuilding Bday stats...'))
+        else:
+            pending = await ctx.send(embed=discord.Embed(title='Rebuilding Bday stats...'))
+        if await Util.check_channel(ctx, True):
+            new_bday = {'bday': {'timestamp': dt.datetime.utcnow() - dt.timedelta(days=366)}}
+            if member and not member.bot:
+                self.server_db.find_one_and_update({'_id': str(member.id)}, {'$set': new_bday}, upsert=True)
+                return
+            for member in ctx.guild.members:
+                if not member.bot:
+                    self.server_db.find_one_and_update({'_id': str(member.id)}, {'$set': new_bday}, upsert=True)
+            await pending.edit(embed=discord.Embed(title='Done'))
+            return pending
+
+    @commands.command()
+    @commands.has_guild_permissions(manage_messages=True)
+    async def birthday(self, ctx, member: discord.Member):
+        """Wish a user a happy birthday!"""
+        self.server_db = self.db[str(ctx.guild.id)]['users']
+        with open(f'config/{ctx.guild.id}/config.json', 'r') as f:
+            config = json.load(f)
+        user = self.server_db.find_one({'_id': str(ctx.author.id)})
+        try:
+            if dt.datetime.utcnow() <= user['bday']['timestamp'] +  dt.timedelta(days=364):
+                day_delay_embed = discord.Embed(title="\U0001f550 You have to wait until next year! \U0001f550 ")
+                await ctx.send(embed=day_delay_embed)
+                return
+        except KeyError:
+            pass
+        except UnboundLocalError:
+            pass
+        he_role = discord.utils.get(ctx.message.guild.roles, name='He/Him')
+        she_role = discord.utils.get(ctx.message.guild.roles, name='She/Her')
+        they_role = discord.utils.get(ctx.message.guild.roles, name='They/Them')
+        birthday_role = ctx.message.guild.get_role(int(config['role_config']['birthday']))
+
+        if he_role in member.roles:
+            birthday_embed = discord.Embed(title='\U0001f389 Happy Birthday! \U0001f389',
+                                           description=f"Wish {member.display_name} a happy birthday! Let's celebrate "
+                                                       f"with him!")
+        elif she_role in member.roles:
+            birthday_embed = discord.Embed(title='\U0001f389 Happy Birthday! \U0001f389',
+                                           description=f"Wish {member.display_name} a happy birthday! Let's celebrate "
+                                                       f"with her!")
+        elif member in they_role.members:
+            birthday_embed = discord.Embed(title='\U0001f389 Happy Birthday! \U0001f389',
+                                           description=f"Wish {member.display_name} a happy birthday! Let's celebrate "
+                                                       f"with them!' ")
+        else:
+            birthday_embed = discord.Embed(title='\U0001f389 Happy Birthday! \U0001f389',
+                                           description=f"Wish {member.display_name} a happy birthday! Let's celebrate "
+                                                       f"with them!")
+        birthday_embed.add_field(name="\U0001f382",
+                                 value="Good work on makin' it round the sun again without biting the dust, haha!"
+                                       "Hopefully it wasn't too boring! \n"
+                                       "Really though, thanks for being a part of our little posse. May your RNG"
+                                       "be extra nice today and the year full of happiness and prosperity. "
+                                       "Sending love from all of us here at GxG")
+        channel = self.bot.get_channel(int(config['channel_config']['lounge']))
+        await channel.send(f'Happy Birthday {member.mention}')
+        await channel.send(embed=birthday_embed)
+
+        await member.add_roles(birthday_role)
+        self.server_db.find_one_and_update({'_id': str(member.id)}, {'$set': {'bday.timestamp': dt.datetime.utcnow()}})
+
+    @staticmethod
+    async def daily_bday_reset(self, guild):
+        self.server_db = self.db[str(guild.id)]['users']
+        with open(f'config/{guild.id}/config.json', 'r') as f:
+            config = json.load(f)
+        birthday_role = guild.get_role(int(config['role_config']['birthday']))
+        for member in birthday_role.members:
+            user = self.server_db.find_one({'_id': str(member.id)})
+            try:
+                if dt.datetime.utcnow() >= user['bday']['timestamp'] + dt.timedelta(hours=16):
+                    try:
+                        await member.remove_roles(birthday_role)
+                    except Forbidden:
+                        channel = config['channel_config']['config_channel']
+                        channel.send("I don't have the permissions to remove birthday role.")
+            except KeyError:
+                continue
 
     @commands.Cog.listener()
     async def on_message(self, message):
