@@ -4,6 +4,9 @@ import discord
 from discord.ext import commands
 import datetime
 
+from lib.mongo import Mongo
+from master import Master
+
 
 class Welcome(commands.Cog):
     def __init__(self, bot):

@@ -19,7 +19,7 @@ class Level(commands.Cog, name='Level'):
         self.server_db = None
 
     @commands.command(name='build_level', hidden=True, aliases=['rebuild_level'])
-    @commands.has_guild_permissions(administrator=True)
+    @commands.is_owner()
     async def build_level(self, ctx, member: discord.Member = None, pending=None):
         self.server_db = self.db[str(ctx.guild.id)]['users']
         if pending:
@@ -34,7 +34,6 @@ class Level(commands.Cog, name='Level'):
                 return
             for member in ctx.guild.members:
                 if not member.bot:
-                    new_level['exp'] = random.randint(100, 15000)
                     self.server_db.find_one_and_update({"_id": str(member.id)}, {'$set': new_level}, upsert=True)
             await pending.edit(embed=discord.Embed(title='Done'))
             return pending
@@ -140,15 +139,24 @@ class Level(commands.Cog, name='Level'):
                 config = json.load(f)
         self.server_db = self.db[str(guild_id)]['users']
         guild = self.bot.get_guild(guild_id)
-        users = self.server_db.find().sort('exp', -1)[0:5]
+        users = self.server_db.find().sort('exp', -1)[0:10]
+        blacklist = False
         top_5 = []
         for user in users:
-            top_5.append(int(user['_id']))
+            member = await self.bot.guild.fetch_member(user('_id'))
+            blacklist = False
+            for role in member.roles:
+                if role.id in config['role_config']['top_5_blacklist']:
+                    blacklist = True
+                    break
+
+            if not blacklist:
+                top_5.append(int(user['_id']))
+            if len(top_5) == 5:
+                break
+
         for member in guild.members:
             if member.id in top_5 and guild.get_role(config['role_config']['top_5']) not in member.roles:
-                for role in member.roles:
-                    if role.id in config['role_config']['top_5_blacklist']:
-                        continue
                 await member.add_roles(guild.get_role(config['role_config']['top_5']))
             elif member.id not in top_5 and guild.get_role(config['role_config']['top_5']) in member.roles:
                 await member.remove_roles(guild.get_role(config['role_config']['top_5']))

@@ -88,5 +88,10 @@ class Friend(commands.Cog):
         embed.set_image(url=url)
         await ctx.channel.send(embed=embed)
 
+    @commands.command(name= "sherpa", aliases= ['Sherpa'])
+    async def sherpa(self, ctx):
+        await ctx.send('https://docs.google.com/document/d/1NSvJ5KsutXBTnjXfL2BgTi-Z7p4EdqXfruAQEtb32VU/edit?usp=sharing')
+
+
 def setup(bot):
     bot.add_cog(Friend(bot))

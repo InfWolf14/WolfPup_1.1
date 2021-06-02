@@ -99,11 +99,11 @@ class Triumphant(commands.Cog, name='Triumphant'):
                         continue
         else:
             content = msg.content
-            if msg.mentions:
-                for member in guild.members:
-                    if member in msg.mentions:
-                        id_list.append(str(member.id))
-                        name_list.append(str(member.name))
+        print(msg.mentions)
+        if msg.mentions:
+            for member in msg.mentions:
+                id_list.append(str(member.id))
+                name_list.append(str(member.name))
         embed = discord.Embed(title=f"{msg.author} said...",
                               description=f'{content}\n\n[Jump to Message](https://discordapp.com/channels/{payload.guild_id}/{payload.channel_id}/{payload.message_id})',
                               colour=0x784fd7,
@@ -133,8 +133,8 @@ class Triumphant(commands.Cog, name='Triumphant'):
             embed.set_image(url=msg.attachments[0].url)
         embed.add_field(name='Nominated by:', value=f'{payload.member.name}')
         await posting_channel.send(embed=embed)
-        if os.path.isfile(f'assets/json/server/{guild.id}/triumphant.json'):
-            with open(f'assets/json/server/{guild.id}/triumphant.json', 'r') as f:
+        if os.path.isfile(f'config/{payload.guild_id}/triumphant.json'):
+            with open(f'config/{payload.guild_id}/triumphant.json', 'r') as f:
                 users = json.load(f)
         else:
             users = {}
@@ -242,6 +242,31 @@ class Triumphant(commands.Cog, name='Triumphant'):
                                       description="These users have received their role.")
         triumph_embed.add_field(name="Users:", value=f"{member_list}")
         await ctx.send(embed=triumph_embed)
+
+    @commands.command()
+    @commands.is_owner()
+    async def manual_reset(self, ctx):
+        if os.path.isfile(f'config/{ctx.server.id}/triumphant_copy.json'):
+            return
+        elif not os.path.isfile(f'config/{ctx.server.id}/triumphant_copy.json') and os.path.isfile(f'config/{ctx.server.id}/triumphant_copy.json'):
+            with open(f'config/{ctx.server.id}/triumphant_copy.json', 'r') as f:
+                users = json.load(f)
+            with open(f'config/{ctx.server.id}/triumphant_copy.json', 'w') as f:
+                json.dump(users, f)
+
+            os.remove(f'config/{ctx.server.id}/triumphant.json')
+
+            triumphant = {}
+
+            with open(f'assets/json/server/{str(ctx.server.id)}/triumphant.json', 'w') as f:
+                json.dump(triumphant, f)
+
+            reset_embed = discord.Embed(title="\U0001f5d3| New Week Starts Here. Get that bread!")
+            with open(f'config/{ctx.server.id}/config.json', 'r') as f:
+                config = json.load(f)
+            chan = self.bot.get_channel(int(config['triumphant_config']["triumph_channel"]))
+
+            await chan.send(embed=reset_embed)
 
     @staticmethod
     async def triumphant_reset(self, server):

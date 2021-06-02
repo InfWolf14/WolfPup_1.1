@@ -54,7 +54,10 @@ class Starboard(commands.Cog, name='Starboard'):
                             if message.content:
                                 content = message.content.__add__(f'\n\n**Link Preview:**\n{copy_embed["description"]}')
                             else:
-                                content = copy_embed.description
+                                try:
+                                    content = copy_embed.description
+                                except:
+                                    pass
                             if "fields" in copy_embed:
                                 for embeds in message.embeds:
                                     for field in embeds.fields:

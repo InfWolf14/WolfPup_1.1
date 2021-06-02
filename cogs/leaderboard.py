@@ -1,3 +1,5 @@
+import json
+
 import discord
 from discord.ext import commands
 from lib.util import Util
@@ -16,6 +18,8 @@ class Leaderboard(commands.Cog):
     @commands.command(name='leaderboard', aliases=['lb'])
     async def leaderboard(self, ctx, *args):
         async with ctx.channel.typing():
+            with open(f'config/{ctx.guild.id}/config.json', 'r') as f:
+                config = json.load(f)
             await ctx.message.delete()
             self.server_db = self.db[str(ctx.guild.id)]['users']
             leaderboard = None
@@ -56,7 +60,9 @@ class Leaderboard(commands.Cog):
                             if rank <= 15:
                                 listing += f'{user_str}\n'
                                 rank += 1
-                        except AttributeError:
+                        except (AttributeError, KeyError):
+                            config_channel = await self.bot.fetch_channel(config['channel_config']['config_channel'])
+                            await config_channel.send(f'Error. {user["_id"]} created the error.')
                             continue
                     if my_stat is not None:
                         listing += f'\n__**Your Ranking:**__\n{my_stat}'

@@ -70,6 +70,7 @@ async def weekly():
             await Triumphant.triumphant_reset(Triumphant(bot), guild)
             await config_channel.send(embed=discord.Embed(title=f'{config_channel.guild.name} Weekly Reset!'))
 
+
 async def cactpot():
     """Cactpot Reminder"""
     for server in bot.guilds:
@@ -80,15 +81,16 @@ async def cactpot():
         if not role or not channel:
             return
         embed = discord.Embed(title='**The JumboCactPot has been drawn!**', description="Don't forget to check your "
-                                                                                      "tickets within the hour for the "
-                                                                                      "Early Bird bonus (+7%). If the "
-                                                                                      "Jackpot II action isn't activated"
-                                                                                      " on the Free Company, then please "
-                                                                                      "activate it now.")
+                                                                                        "tickets within the hour for the "
+                                                                                        "Early Bird bonus (+7%). If the "
+                                                                                        "Jackpot II action isn't activated"
+                                                                                        " on the Free Company, then please "
+                                                                                        "activate it now.")
         embed.set_image(url="https://img.finalfantasyxiv.com/lds/blog_image/jp_blog/jp20170607_iw_04.png")
 
         await channel.send({role.ment})
         await channel.send(embed=embed)
+
 
 async def monthly():
     """Monthly reset timer"""
@@ -108,6 +110,53 @@ async def monthly():
 
 
 @bot.event
+async def on_command_error(self, ctx, e):
+    config_channel = None
+    if os.path.isfile(f'config/{str(ctx.guild.id)}/config.json'):
+        with open(f'config/{str(ctx.guild.id)}/config.json', 'r') as f:
+            config = json.load(f)
+        config_channel = await self.bot.fetch_channel(config['channel_config']['config_channel'])
+    new_embed = discord.Embed(title=f'**[Error]** {type(e).__name__} **[Error]**')
+    try:
+        new_embed.description = f'Message: \"*{ctx.message.content}*\"'
+        await ctx.message.delete()
+    except discord.errors.NotFound:
+        pass
+    new_embed.add_field(name='Traceback Information:',
+                        value=''.join(tb.format_exception_only(type(e), e)).replace(':', ':\n'))
+    new_embed.set_footer(text=f'Use: [ {ctx.prefix}help ] for assistance')
+    if config_channel is not None:
+        error = await config_channel.send(embed=new_embed)
+    else:
+        error = await ctx.send(embed=new_embed)
+    # await asyncio.sleep(30)
+    # await error.delete()
+
+
+@bot.event
+async def on_error(self, ctx, e):
+    config_channel = None
+    if os.path.isfile(f'config/{str(ctx.guild.id)}/config.json'):
+        with open(f'config/{str(ctx.guild.id)}/config.json', 'r') as f:
+            config = json.load(f)
+        config_channel = await self.bot.fetch_channel(config['channel_config']['config_channel'])
+    new_embed = discord.Embed(title=f'**[Error]** {type(e).__name__} **[Error]**')
+    try:
+        new_embed.description = f'Message: \"*{ctx.message.content}*\"'
+        await ctx.message.delete()
+    except discord.errors.NotFound:
+        pass
+    new_embed.add_field(name='Traceback Information:',
+                        value=''.join(tb.format_exception_only(type(e), e)).replace(':', ':\n'))
+    new_embed.set_footer(text=f'Use: [ {ctx.prefix}help ] for assistance')
+    if config_channel is not None:
+        error = await config_channel.send(embed=new_embed)
+    else:
+        error = await ctx.send(embed=new_embed)
+    # await asyncio.sleep(30)
+    # await error.delete()
+
+@bot.event
 async def on_member_join(member):
     with open(f'config/{str(member.guild.id)}/config.json', 'r') as f:
         config = json.load(f)
@@ -116,20 +165,19 @@ async def on_member_join(member):
 
 
 @bot.event
-async def on_member_leave(member):
+async def on_member_remove(member):
     with open(f'config/{str(member.guild.id)}/config.json', 'r') as f:
         config = json.load(f)
     config_channel = bot.get_channel(int(config['channel_config']['config_channel']))
     Mongo.init_db(Mongo())['server'][str(member.guild.id)].find_one_and_delete({'_id': str(member.id)})
-    config_channel.send(embed=discord.Embed(title=f'{member.displayname} left'))
-
+    await config_channel.send(f"{member.name}'s data was deleted")
 
 @bot.event
 async def on_ready():
     print(f'\nLogged in as: {bot.user.name} - {bot.user.id}\nVersion: {discord.__version__}')
     print(f'Successfully logged in and booted...!')
     schedule.add_job(daily, 'cron', day='*', hour=18)
-    schedule.add_job(weekly, 'cron', week='*', day_of_week='sun', hour=6)
+    schedule.add_job(weekly, 'cron', week='*', day_of_week='sat', hour=22)
     schedule.add_job(monthly, 'cron', month='*', day='1')
     schedule.add_job(cactpot, 'cron', week='*', day_of_week='sat', hour=20)
     schedule.start()
