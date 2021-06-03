@@ -139,27 +139,32 @@ class Level(commands.Cog, name='Level'):
                 config = json.load(f)
         self.server_db = self.db[str(guild_id)]['users']
         guild = self.bot.get_guild(guild_id)
-        users = self.server_db.find().sort('exp', -1)[0:10]
+        users = self.server_db.find().sort('exp', -1)[0:20]
         blacklist = False
         top_5 = []
+        top_5_role = guild.get_role(config['role_config']['top_5'])
+
         for user in users:
-            member = await self.bot.guild.fetch_member(user('_id'))
+            try:
+                member = await guild.fetch_member(int(user['_id']))
+            except discord.errors.NotFound:
+                continue
             blacklist = False
             for role in member.roles:
                 if role.id in config['role_config']['top_5_blacklist']:
                     blacklist = True
                     break
-
             if not blacklist:
                 top_5.append(int(user['_id']))
             if len(top_5) == 5:
                 break
-
-        for member in guild.members:
-            if member.id in top_5 and guild.get_role(config['role_config']['top_5']) not in member.roles:
-                await member.add_roles(guild.get_role(config['role_config']['top_5']))
-            elif member.id not in top_5 and guild.get_role(config['role_config']['top_5']) in member.roles:
-                await member.remove_roles(guild.get_role(config['role_config']['top_5']))
+        for user_id in top_5:
+            member = await guild.fetch_member(user_id)
+            if member.id in top_5 and top_5_role not in member.roles:
+                await member.add_roles(top_5_role)
+        for member in top_5_role.members:
+            if member.id not in top_5:
+                await member.remove_roles(top_5_role)
 
     @commands.command(name='build_bday', hidden=True, aliases = ['rebuild_bday'])
     @commands.is_owner()
