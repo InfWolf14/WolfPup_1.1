@@ -30,5 +30,11 @@
   "triumphant_config": {
     "triumph_channel": 742389034420142090,
     "triumph_react": "\ud83d\ude04"
+  },
+  "starboard_config": {
+    "starboard_channel": 742534075583037540,
+    "star_react": "\ud83d\udd25",
+    "starred_react": "\ud83d\udc4e",
+    "threshold": 1
   }
 }

@@ -249,7 +249,7 @@ class Triumphant(commands.Cog, name='Triumphant'):
         if os.path.isfile(f'config/{ctx.server.id}/triumphant_copy.json'):
             return
         elif not os.path.isfile(f'config/{ctx.server.id}/triumphant_copy.json') and os.path.isfile(f'config/{ctx.server.id}/triumphant_copy.json'):
-            with open(f'config/{ctx.server.id}/triumphant_copy.json', 'r') as f:
+            with open(f'config/{ctx.server.id}/triumphant.json', 'r') as f:
                 users = json.load(f)
             with open(f'config/{ctx.server.id}/triumphant_copy.json', 'w') as f:
                 json.dump(users, f)

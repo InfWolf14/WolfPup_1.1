@@ -156,7 +156,7 @@ async def on_error(self, ctx, e):
     # await asyncio.sleep(30)
     # await error.delete()
 
-@bot.event
+"""@bot.event
 async def on_member_join(member):
     with open(f'config/{str(member.guild.id)}/config.json', 'r') as f:
         config = json.load(f)
@@ -170,7 +170,7 @@ async def on_member_remove(member):
         config = json.load(f)
     config_channel = bot.get_channel(int(config['channel_config']['config_channel']))
     Mongo.init_db(Mongo())['server'][str(member.guild.id)].find_one_and_delete({'_id': str(member.id)})
-    await config_channel.send(f"{member.name}'s data was deleted")
+    await config_channel.send(f"{member.name}'s data was deleted")"""
 
 @bot.event
 async def on_ready():

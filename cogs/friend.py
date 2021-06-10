@@ -52,7 +52,8 @@ class Friend(commands.Cog):
                   "https://media.tenor.com/images/11baf16c4029abc97bdae7ff3f6ffe3b/tenor.gif",
                   "https://media.giphy.com/media/rvxGjhW3TKVeo/source.gif",
                   "https://i.gifer.com/RLil.gif",
-                  "https://i.imgur.com/juYkVr8.jpg"]
+                  "https://i.imgur.com/juYkVr8.jpg",
+                  "https://cdn.discordapp.com/attachments/586181879611260928/850529213000712233/tenor.gif"]
         url = random.choice(images)
         embed = discord.Embed(color=0x00ff00)
         if member is not None:

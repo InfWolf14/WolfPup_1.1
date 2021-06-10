@@ -12,6 +12,7 @@ from lib.mongo import Mongo
 from pymongo import ReturnDocument
 
 
+
 class Level(commands.Cog, name='Level'):
     def __init__(self, bot):
         self.bot = bot
@@ -165,6 +166,41 @@ class Level(commands.Cog, name='Level'):
         for member in top_5_role.members:
             if member.id not in top_5:
                 await member.remove_roles(top_5_role)
+
+    @commands.Cog.listener()
+    async def on_member_join(self, member):
+        with open(f'config/{str(member.guild.id)}/config.json', 'r') as f:
+            config = json.load(f)
+        config_channel = self.bot.get_channel(int(config['channel_config']['config_channel']))
+        await Master.build_user_db(config_channel, member)
+
+    @commands.Cog.listener()
+    async def on_member_remove(self, member):
+        with open(f'config/{str(member.guild.id)}/config.json', 'r') as f:
+            config = json.load(f)
+        config_channel = self.bot.get_channel(int(config['channel_config']['config_channel']))
+        self.server_db = self.db[str(member.guild.id)]['users']
+        self.server_db.find_one_and_delete({'_id': str(member.id)})
+        await config_channel.send(f"{member.name}'s data was deleted")
+
+    @commands.command(hidden=True)
+    @commands.is_owner()
+    async def prune_members(self, ctx):
+        with open(f'config/{str(ctx.guild.id)}/config.json', 'r') as f:
+            config = json.load(f)
+        config_channel = self.bot.get_channel(int(config['channel_config']['config_channel']))
+        self.server_db = self.db[str(ctx.guild.id)]['users']
+        for user in self.server_db:
+            try:
+                test_user = self.bot.get_user(int(user["_id"]))
+                if test_user:
+                    continue
+                elif not test_user:
+                    self.server_db.find_one_and_delete({'_id': int(user["_id"])})
+            except:
+                await config_channel.send('Adam, you really fucked it up this time... ')
+                continue
+        await config_channel.send("Complete")
 
     @commands.command(name='build_bday', hidden=True, aliases = ['rebuild_bday'])
     @commands.is_owner()

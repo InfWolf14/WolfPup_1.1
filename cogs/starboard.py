@@ -32,6 +32,7 @@ class Starboard(commands.Cog, name='Starboard'):
 
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, payload):
+        print('in')
         try:
             if os.path.isfile(f'config/{payload.guild_id}/config.json'):
                 with open(f'config/{payload.guild_id}/config.json', 'r') as f:
