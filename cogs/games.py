@@ -18,6 +18,7 @@ class GamesCog(commands.Cog, name='games'):
         self.suit_values = ['Spade', 'Heart', 'Club', 'Diamond']
         self.card_emojies = {'Spade': '\U00002660\U0000fe0f', 'Heart': '\U00002665\U0000fe0f',
                              'Club': '\U00002663\U0000fe0f', 'Diamond': '\U00002666\U0000fe0f'}
+        self.items = []
 
     def make_sequence(self, seq):
         if seq is None:
@@ -81,7 +82,6 @@ class GamesCog(commands.Cog, name='games'):
 
             dealer_message_id = dealer_message.id
             player_message_id = player_message.id
-
 
             player_bj_check = await self.blackjack_check(player_cards)
             dealer_bj_check = await self.blackjack_check(dealer_cards)
@@ -177,7 +177,8 @@ class GamesCog(commands.Cog, name='games'):
                             player_dict = await self.hand_value(hand1, ctx.author, ctx.channel)
                             hand1_total = player_dict['total']
                             hand1_string = player_dict['card_string']
-                            await hand1_message.edit(content=f'`Hand 1 Player Cards: {hand1_string}, score {hand1_total}`')
+                            await hand1_message.edit(
+                                content=f'`Hand 1 Player Cards: {hand1_string}, score {hand1_total}`')
                             if hand1_total > 21:
                                 await ctx.send('You __**BUSTED**__')
                                 hand = 2
@@ -201,7 +202,8 @@ class GamesCog(commands.Cog, name='games'):
                             player_dict = await self.hand_value(hand2, ctx.author, ctx.channel)
                             hand2_total = player_dict['total']
                             hand2_card_string = player_dict['card_string']
-                            await hand2_message.edit(content=f'`**Hand 2** - Player Cards: {hand2_card_string}, score {hand2_total}`')
+                            await hand2_message.edit(
+                                content=f'`**Hand 2** - Player Cards: {hand2_card_string}, score {hand2_total}`')
                             if player_total > 21:
                                 await ctx.send('You __**BUSTED**__')
                                 break
@@ -319,7 +321,7 @@ class GamesCog(commands.Cog, name='games'):
                             hand_total += acevalue
 
                         else:
-                            await channel.send(f'Your response must be 1 or 11.', delete_after = 3)
+                            await channel.send(f'Your response must be 1 or 11.', delete_after=3)
                     except asyncio.TimeoutError:
                         await channel.send("Timeout. Try again.")
         if player.bot:
@@ -334,7 +336,7 @@ class GamesCog(commands.Cog, name='games'):
             dict['dealer'] = dealer_hand
 
             if 'Ace' in cards:
-                
+
                 if len(cards) >= 3:
                     hand_total -= 10
 
@@ -356,12 +358,63 @@ class GamesCog(commands.Cog, name='games'):
         else:
             return False
 
-    @commands.command(aliases = ['howtoblackjack','howto'])
+    @commands.command(aliases=['howtoblackjack', 'howto'])
     async def blackjackrules(self, ctx):
         embed = discord.Embed(title='How to play')
-        embed.add_field(name= 'How to:', value='You will need to reply with the words in chat.')
+        embed.add_field(name='How to:', value='You will need to reply with the words in chat.')
         embed.add_field(name='What if I have an Ace?', value='You will need to say what you want your Ace to be '
                                                              'worth. You will need to reply with either a 1 or 11')
         await ctx.send(embed=embed)
+
+    @commands.command(aliases=['rpg', 'playrpg'])
+    async def rpg_game(self, ctx):
+        playing_message = await ctx.send("You slowly open your eyes...  \n"
+                                         "You are in a dark room, there is one candle on a cabinet. \n"
+                                         "There is one door with a handle.\n"
+                                         "1 - Search cabinet\n"
+                                         "2 - Open door\n"
+                                         "||Please only use the numbers that correspond with the action||")
+        try:
+            response = await self.bot.wait_for('message', timeout=20.0,
+                                               check=self.message_check(channel=ctx.message.channel))
+        except asyncio.TimeoutError:
+            await ctx.send("You died because of your indecision... ")
+
+        if response.content == "1":
+            response.delete()
+            await playing_message.edit('You open the cabinet...')
+            await asyncio.sleep(3)
+            randomnum = random.randint(1,10)
+            if randomnum <= 8:
+                await playing_message.edit('A bat flies out!')
+
+            elif randomnum > 8:
+                await playing_message.edit('You see a person in there...\n'
+                                           'You realize it is Sol\n'
+                                           'He tells you to fuck off and pulls the door closed.')
+
+        elif response.content == '2':
+            response.delete()
+            await playing_message.edit('You open the door...')
+            await asyncio.sleep(3)
+            await playing_message.edit('You see another empty room...')
+            randomnum = random.randint(1, 10)
+            if randomnum == 10:
+                await playing_message.edit('A wild Shiina appears! \n'
+                                           'She swings her ban hammer!\n'
+                                           'What do you do?'
+                                           '1 - You run!'
+                                           '2 - You mention FFXIV!')
+            try:
+                response = await self.bot.wait_for('message', timeout=20.0,
+                                                   check=self.message_check(channel=ctx.message.channel))
+            except asyncio.TimeoutError:
+                await ctx.send("Shiina hits you with her ban hammer! You die because you're indecisive.")
+
+            if response.content == "1":
+
+
+
+
 def setup(bot):
     bot.add_cog(GamesCog(bot))

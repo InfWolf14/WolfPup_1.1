@@ -4,6 +4,8 @@ import discord
 from discord.ext import commands
 import datetime
 
+from master import Master
+
 
 class Welcome(commands.Cog):
     def __init__(self, bot):
@@ -67,6 +69,8 @@ class Welcome(commands.Cog):
                 f"\U0001f4e2 \U0000269f ~~**Tactical nuke**~~ {ment}, incoming!🚨"
             ]
             await welcome_channel.send(random.choice(welcome_messages))
+            config_channel = self.bot.get_channel(int(config['channel_config']['config_channel']))
+            await Master.build_user_db(config_channel, after)
 
     @commands.Cog.listener()
     async def on_member_remove(self, member):

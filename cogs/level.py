@@ -2,6 +2,7 @@ import os
 import json
 import random
 import asyncio
+import traceback
 from math import sqrt, floor
 import datetime as dt
 import discord
@@ -10,7 +11,6 @@ from discord.ext import commands
 from lib.util import Util
 from lib.mongo import Mongo
 from pymongo import ReturnDocument
-
 
 
 class Level(commands.Cog, name='Level'):
@@ -51,46 +51,56 @@ class Level(commands.Cog, name='Level'):
     async def daily(self, ctx, member: discord.Member = None):
         """Use to claim your daily exp bonus or give to a friend!"""
         async with ctx.channel.typing():
-            self.server_db = self.db[str(ctx.guild.id)]['users']
-            broken_streak = False
-            if member is None:
-                member = ctx.author
-            if await Util.check_channel(ctx, True):
-                self.server_db.find_one_and_update({'_id': str(ctx.author.id)}, {'$inc': {'exp_streak': 1}})
-                user = self.server_db.find_one({'_id': str(ctx.author.id)})
-                if user['flags']['daily']:
-                    streak = user['exp_streak']
-                    new_embed = discord.Embed(title='You\'ve claimed your daily bonus!',
-                                              color=discord.Colour.gold())
-                    new_embed.set_thumbnail(url='https://cdn.discordapp.com/attachments/532380077896237061/800924153053970476'
-                                                '/terry_coin.png')
-                    if member != ctx.author:
-                        new_embed.title = 'You\'ve given your bonus to your friend!'
-                    try:
-                        if (user['flags']['daily_stamp'] + dt.timedelta(hours=36)) < dt.datetime.utcnow():
-                            new_embed.description = f'This is day {streak}. You missed your streak window...'
-                            self.server_db.find_one_and_update({'_id': str(ctx.author.id)}, {'$set': {'exp_streak': 0}})
-                            streak -= 1
-                            broken_streak = True
-                    except:
-                        pass
-                    if not broken_streak:
-                        if streak >= 5:
-                            new_embed.description = '__BONUS__ This is your 5-day streak! __BONUS__'
-                            self.server_db.find_one_and_update({'_id': str(ctx.author.id)}, {'$set': {'exp_streak': 0}})
-                            streak = 10
-                        else:
-                            new_embed.description = f'This is day {streak}. Keep it up to day 5!'
-                    self.server_db.find_one_and_update({'_id': str(ctx.author.id)}, {'$set': {'flags.daily': False}})
-                    self.server_db.find_one_and_update({'_id': str(ctx.author.id)}, {'$set': {'flags.daily_stamp': dt.datetime.utcnow()}})
-                    daily_exp = int(random.randint(150, 250)*(1+(0.15*streak)))
-                    await self.update_experience(ctx.guild.id, member.id, daily_exp)
-                    await ctx.send(embed=new_embed)
-                else:
-                    await ctx.message.delete()
-                    pending = await ctx.send(embed=discord.Embed(title='You\'ve already claimed your daily bonus today!'))
-                    await asyncio.sleep(5)
-                    await pending.delete()
+            try:
+                self.server_db = self.db[str(ctx.guild.id)]['users']
+                broken_streak = False
+                if member is None:
+                    member = ctx.author
+                if await Util.check_channel(ctx, True):
+                    self.server_db.find_one_and_update({'_id': str(ctx.author.id)}, {'$inc': {'exp_streak': 1}})
+                    user = self.server_db.find_one({'_id': str(ctx.author.id)})
+                    if user['flags']['daily']:
+                        streak = user['exp_streak']
+                        new_embed = discord.Embed(title='You\'ve claimed your daily bonus!',
+                                                  color=discord.Colour.gold())
+                        new_embed.set_thumbnail(url='https://cdn.discordapp.com/attachments/532380077896237061/800924153053970476'
+                                                    '/terry_coin.png')
+                        if member != ctx.author:
+                            new_embed.title = 'You\'ve given your bonus to your friend!'
+                        try:
+                            if (user['flags']['daily_stamp'] + dt.timedelta(hours=36)) < dt.datetime.utcnow():
+                                new_embed.description = f'This is day {streak}. You missed your streak window...'
+                                self.server_db.find_one_and_update({'_id': str(ctx.author.id)}, {'$set': {'exp_streak': 0}})
+                                streak -= 1
+                                broken_streak = True
+                        except:
+                            pass
+                        if not broken_streak:
+                            if streak >= 5:
+                                new_embed.description = '__BONUS__ This is your 5-day streak! __BONUS__'
+                                self.server_db.find_one_and_update({'_id': str(ctx.author.id)}, {'$set': {'exp_streak': 0}})
+                                streak = 10
+                            else:
+                                new_embed.description = f'This is day {streak}. Keep it up to day 5!'
+                        self.server_db.find_one_and_update({'_id': str(ctx.author.id)}, {'$set': {'flags.daily': False}})
+                        self.server_db.find_one_and_update({'_id': str(ctx.author.id)}, {'$set': {'flags.daily_stamp': dt.datetime.utcnow()}})
+                        daily_exp = int(random.randint(150, 250)*(1+(0.15*streak)))
+                        await self.update_experience(ctx.guild.id, member.id, daily_exp)
+                        await ctx.send(embed=new_embed)
+                    else:
+                        await ctx.message.delete()
+                        pending = await ctx.send(embed=discord.Embed(title='You\'ve already claimed your daily bonus today!'))
+                        await asyncio.sleep(5)
+                        await pending.delete()
+            except Exception as e:
+                with open(f'config/{ctx.guild.id}/config.json', 'r') as f:
+                    config = json.load(f)
+                config_channel = self.bot.get_channel(int(config['channel_config']['config_channel']))
+                await config_channel.send("Adam. Ya done fucked up.\n"
+                                          f"{e}\n"
+                                          f"{e.args}\n"
+                                          f"{type(e)}")
+                traceback.print_exc()
 
     @commands.command(name='add_experience', hidden=True, pass_context=True, aliases=['xp'])
     @commands.has_guild_permissions(administrator=True)
@@ -126,9 +136,12 @@ class Level(commands.Cog, name='Level'):
         user = self.server_db.find_one_and_update({'_id': str(user_id)}, {'$set': {'level': self.update_level(user['exp'])}},
                                                   return_document=ReturnDocument.AFTER)
         if guild.get_role(config['role_config'][f'level_{user["level"]}']) not in member.roles:
-            for x in range(5):
-                if guild.get_role(config['role_config'][f'level_{x+1}']) in member.roles:
-                    await member.remove_roles(guild.get_role(config['role_config'][f'level_{x+1}']))
+            try:
+                for x in range(1,4):
+                    if guild.get_role(config['role_config'][f'level_{x+1}']) in member.roles:
+                        await member.remove_roles(guild.get_role(config['role_config'][f'level_{x+1}']))
+            except KeyError:
+                pass
             if user["level"] > 1:
                 await member.add_roles(guild.get_role(config['role_config'][f'level_{user["level"]}']))
         await self.generate_top_5(guild.id)
@@ -166,13 +179,6 @@ class Level(commands.Cog, name='Level'):
         for member in top_5_role.members:
             if member.id not in top_5:
                 await member.remove_roles(top_5_role)
-
-    @commands.Cog.listener()
-    async def on_member_join(self, member):
-        with open(f'config/{str(member.guild.id)}/config.json', 'r') as f:
-            config = json.load(f)
-        config_channel = self.bot.get_channel(int(config['channel_config']['config_channel']))
-        await Master.build_user_db(config_channel, member)
 
     @commands.Cog.listener()
     async def on_member_remove(self, member):
@@ -275,21 +281,24 @@ class Level(commands.Cog, name='Level'):
 
     @staticmethod
     async def daily_bday_reset(self, guild):
-        self.server_db = self.db[str(guild.id)]['users']
-        with open(f'config/{guild.id}/config.json', 'r') as f:
-            config = json.load(f)
-        birthday_role = guild.get_role(int(config['role_config']['birthday']))
-        for member in birthday_role.members:
-            user = self.server_db.find_one({'_id': str(member.id)})
-            try:
-                if dt.datetime.utcnow() >= user['bday']['timestamp'] + dt.timedelta(hours=16):
-                    try:
-                        await member.remove_roles(birthday_role)
-                    except Forbidden:
-                        channel = config['channel_config']['config_channel']
-                        channel.send("I don't have the permissions to remove birthday role.")
-            except KeyError:
-                continue
+        try:
+            self.server_db = self.db[str(guild.id)]['users']
+            with open(f'config/{guild.id}/config.json', 'r') as f:
+                config = json.load(f)
+            birthday_role = guild.get_role(int(config['role_config']['birthday']))
+            for member in birthday_role.members:
+                user = self.server_db.find_one({'_id': str(member.id)})
+                try:
+                    if dt.datetime.utcnow() >= user['bday']['timestamp'] + dt.timedelta(hours=16):
+                        try:
+                            await member.remove_roles(birthday_role)
+                        except Forbidden:
+                            channel = config['channel_config']['config_channel']
+                            channel.send("I don't have the permissions to remove birthday role.")
+                except KeyError:
+                    continue
+        except TypeError:
+            return
 
     @commands.Cog.listener()
     async def on_message(self, message):

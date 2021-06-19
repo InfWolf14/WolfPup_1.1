@@ -45,10 +45,9 @@ async def daily():
             with open(f'config/{str(guild.id)}/config.json', 'r') as f:
                 config = json.load(f)
         if config['channel_config']['config_channel']:
-            try:
-                config_channel = await bot.fetch_channel(config['channel_config']['config_channel'])
-            except discord.errors.NotFound:
-                return
+
+            config_channel = await bot.fetch_channel(config['channel_config']['config_channel'])
+
             # Daily Reset Functions Here
             await Util.reset_user_flags(Util(), config_channel)
             await Level.daily_bday_reset(Level(bot), guild)
@@ -62,10 +61,7 @@ async def weekly():
             with open(f'config/{str(guild.id)}/config.json', 'r') as f:
                 config = json.load(f)
         if config['channel_config']['config_channel']:
-            try:
-                config_channel = await bot.fetch_channel(config['channel_config']['config_channel'])
-            except discord.errors.NotFound:
-                return
+            config_channel = bot.get_channel(config['channel_config']['config_channel'])
             # Weekly Reset Functions Here
             await Triumphant.triumphant_reset(Triumphant(bot), guild)
             await config_channel.send(embed=discord.Embed(title=f'{config_channel.guild.name} Weekly Reset!'))
