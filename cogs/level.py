@@ -135,13 +135,14 @@ class Level(commands.Cog, name='Level'):
                                                   return_document=ReturnDocument.AFTER)
         user = self.server_db.find_one_and_update({'_id': str(user_id)}, {'$set': {'level': self.update_level(user['exp'])}},
                                                   return_document=ReturnDocument.AFTER)
-        if guild.get_role(config['role_config'][f'level_{user["level"]}']) not in member.roles:
-            try:
+        try:
+            if guild.get_role(config['role_config'][f'level_{user["level"]}']) not in member.roles:
+
                 for x in range(1,4):
                     if guild.get_role(config['role_config'][f'level_{x+1}']) in member.roles:
                         await member.remove_roles(guild.get_role(config['role_config'][f'level_{x+1}']))
-            except KeyError:
-                pass
+        except KeyError:
+            pass
             if user["level"] > 1:
                 await member.add_roles(guild.get_role(config['role_config'][f'level_{user["level"]}']))
         await self.generate_top_5(guild.id)

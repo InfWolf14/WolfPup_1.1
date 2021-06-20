@@ -384,7 +384,7 @@ class GamesCog(commands.Cog, name='games'):
             response.delete()
             await playing_message.edit('You open the cabinet...')
             await asyncio.sleep(3)
-            randomnum = random.randint(1,10)
+            randomnum = random.randint(1, 10)
             if randomnum <= 8:
                 await playing_message.edit('A bat flies out!')
 
@@ -412,8 +412,15 @@ class GamesCog(commands.Cog, name='games'):
                 await ctx.send("Shiina hits you with her ban hammer! You die because you're indecisive.")
 
             if response.content == "1":
-
-
+                await playing_message.edit("You hit a wall... Shiina looms over you with her hammer and swings...\n"
+                                           "Your world goes black...\n")
+                await asyncio.sleep(5)
+                await playing_message.edit('**__Game Over__** \n'
+                                           f'Use {ctx.prefix}rpg_game to play again.')
+                return
+            elif response.content == '2':
+                await playing_message.edit('Yourn'
+                            )
 
 
 def setup(bot):

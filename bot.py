@@ -45,7 +45,6 @@ async def daily():
             with open(f'config/{str(guild.id)}/config.json', 'r') as f:
                 config = json.load(f)
         if config['channel_config']['config_channel']:
-
             config_channel = await bot.fetch_channel(config['channel_config']['config_channel'])
 
             # Daily Reset Functions Here
@@ -104,79 +103,48 @@ async def monthly():
             await Mod.award_monthly_roles(Mod(bot), guild)
             await config_channel.send(embed=discord.Embed(title=f'{config_channel.guild.name} Monthly Reset!'))
 
-
 @bot.event
-async def on_command_error(self, ctx, e):
+async def on_error(event, *args, **kwargs):
     config_channel = None
-    if os.path.isfile(f'config/{str(ctx.guild.id)}/config.json'):
-        with open(f'config/{str(ctx.guild.id)}/config.json', 'r') as f:
+    message = event.message
+    if os.path.isfile(f'config/{str(message.guild.id)}/config.json'):
+        with open(f'config/{str(message.guild.id)}/config.json', 'r') as f:
             config = json.load(f)
-        config_channel = await self.bot.fetch_channel(config['channel_config']['config_channel'])
-    new_embed = discord.Embed(title=f'**[Error]** {type(e).__name__} **[Error]**')
-    try:
-        new_embed.description = f'Message: \"*{ctx.message.content}*\"'
-        await ctx.message.delete()
-    except discord.errors.NotFound:
-        pass
-    new_embed.add_field(name='Traceback Information:',
-                        value=''.join(tb.format_exception_only(type(e), e)).replace(':', ':\n'))
-    new_embed.set_footer(text=f'Use: [ {ctx.prefix}help ] for assistance')
-    if config_channel is not None:
-        error = await config_channel.send(embed=new_embed)
+        config_channel = await bot.fetch_channel(config['channel_config']['config_channel'])
     else:
-        error = await ctx.send(embed=new_embed)
-    # await asyncio.sleep(30)
-    # await error.delete()
+        return
+    new_embed = discord.Embed(title=f'**[Error]** {type(event).__name__} **[Error]**')
+    await message.channel.send('There was an error. If this continues please send a message in '
+                               '#help_and_feedback or message Adam or Wolf', delete_after=6)
+    await message.delete()
+    new_embed.add_field(name="Event", value=f"{args}")
+    if kwargs:
+        new_embed.add_field(name="Arguments", value=f"{kwargs}")
 
 
 @bot.event
-async def on_error(self, ctx, e):
+async def on_command_error(event, *args, **kwargs):
     config_channel = None
-    if os.path.isfile(f'config/{str(ctx.guild.id)}/config.json'):
-        with open(f'config/{str(ctx.guild.id)}/config.json', 'r') as f:
+    message = event.message
+    if os.path.isfile(f'config/{str(message.guild.id)}/config.json'):
+        with open(f'config/{str(message.guild.id)}/config.json', 'r') as f:
             config = json.load(f)
-        config_channel = await self.bot.fetch_channel(config['channel_config']['config_channel'])
-    new_embed = discord.Embed(title=f'**[Error]** {type(e).__name__} **[Error]**')
-    try:
-        new_embed.description = f'Message: \"*{ctx.message.content}*\"'
-        await ctx.message.delete()
-    except discord.errors.NotFound:
-        pass
-    new_embed.add_field(name='Traceback Information:',
-                        value=''.join(tb.format_exception_only(type(e), e)).replace(':', ':\n'))
-    new_embed.set_footer(text=f'Use: [ {ctx.prefix}help ] for assistance')
-    if config_channel is not None:
-        error = await config_channel.send(embed=new_embed)
+        config_channel = await bot.fetch_channel(config['channel_config']['config_channel'])
     else:
-        error = await ctx.send(embed=new_embed)
-    # await asyncio.sleep(30)
-    # await error.delete()
-
-"""@bot.event
-async def on_member_join(member):
-    with open(f'config/{str(member.guild.id)}/config.json', 'r') as f:
-        config = json.load(f)
-    config_channel = bot.get_channel(int(config['channel_config']['config_channel']))
-    await Master.build_user_db(config_channel, member)
-
-
-@bot.event
-async def on_member_remove(member):
-    with open(f'config/{str(member.guild.id)}/config.json', 'r') as f:
-        config = json.load(f)
-    config_channel = bot.get_channel(int(config['channel_config']['config_channel']))
-    Mongo.init_db(Mongo())['server'][str(member.guild.id)].find_one_and_delete({'_id': str(member.id)})
-    await config_channel.send(f"{member.name}'s data was deleted")"""
+        return
+    new_embed = discord.Embed(title=f'**[Command Error]** {type(event).__name__} **[Command Error]**')
+    await message.channel.send('There was an error. If this continues please send a message in '
+                               '#help_and_feedback or message Adam or Wolf', delete_after=6)
+    await message.delete()
+    new_embed.add_field(name="Event", value=f"{args}")
+    if kwargs:
+        new_embed.add_field(name="Arguments", value=f"{kwargs}")
+    await config_channel.send(embed=new_embed)
 
 @bot.event
 async def on_ready():
     print(f'\nLogged in as: {bot.user.name} - {bot.user.id}\nVersion: {discord.__version__}')
     print(f'Successfully logged in and booted...!')
-    schedule.add_job(daily, 'cron', day='*', hour=18)
-    schedule.add_job(weekly, 'cron', week='*', day_of_week='sat', hour=22)
-    schedule.add_job(monthly, 'cron', month='*', day='1')
-    schedule.add_job(cactpot, 'cron', week='*', day_of_week='sat', hour=20)
-    schedule.start()
     for guild in bot.guilds:
         if not os.path.isdir(f'config/{guild.id}/'):
             os.makedirs(f'config/{guild.id}/')
@@ -189,4 +157,9 @@ async def on_disconnect():
 
 print('\nLoading token and connecting to client...')
 token = open('token.txt', 'r').readline()
+schedule.add_job(daily, 'cron', day='*', hour=18)
+schedule.add_job(weekly, 'cron', week='*', day_of_week='sat', hour=22)
+schedule.add_job(monthly, 'cron', month='*', day='1')
+schedule.add_job(cactpot, 'cron', week='*', day_of_week='sat', hour=20)
+schedule.start()
 bot.run(token, bot=True, reconnect=True)
