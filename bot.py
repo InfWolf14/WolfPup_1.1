@@ -25,7 +25,8 @@ def get_prefix(bot, message):
 
 initial_cogs = ['master', 'cogs.mod', 'cogs.welcome',
                 'cogs.level', 'cogs.profile', 'cogs.thank', 'cogs.leaderboard', 'cogs.friend',
-                'cogs.games', 'cogs.roles', 'cogs.starboard', 'cogs.timer', 'cogs.triumphant']
+                'cogs.games', 'cogs.roles', 'cogs.starboard', 'cogs.timer', 'cogs.triumphant',
+                'cogs.wish', 'cogs.ironwork']
 intents = discord.Intents.default()
 intents.members = True
 intents.messages = True
@@ -62,8 +63,41 @@ async def weekly():
         if config['channel_config']['config_channel']:
             config_channel = bot.get_channel(config['channel_config']['config_channel'])
             # Weekly Reset Functions Here
-            await Triumphant.triumphant_reset(Triumphant(bot), guild)
+            await triumphant_reset(guild)
             await config_channel.send(embed=discord.Embed(title=f'{config_channel.guild.name} Weekly Reset!'))
+
+
+async def triumphant_reset(server):
+    with open(f'config/{server.id}/config.json', 'r') as f:
+        config = json.load(f)
+    chan = bot.get_channel(int(config['triumphant_config']["triumph_channel"]))
+    config_channel = bot.get_channel(config['channel_config']['config_channel'])
+
+    await config_channel.send('Starting Weekly Reset')
+    try:
+        if os.path.isfile(f'config/{server.id}/triumphant_copy.json'):
+            os.remove(f'config/{server.id}/triumphant_copy.json')
+        with open(f'config/{server.id}/triumphant_copy.json', 'r') as f:
+            users = json.load(f)
+
+        with open(f'config/{server.id}/triumphant_copy.json', 'w') as f:
+            json.dump(users, f)
+
+        os.remove(f'config/{server.id}/triumphant.json')
+
+        triumphant = {}
+
+        with open(f'config/{str(server.id)}/triumphant.json', 'w') as f:
+            json.dump(triumphant, f)
+
+        reset_embed = discord.Embed(title="\U0001f5d3| New Week Starts Here. Get that bread!")
+
+        await chan.send(embed=reset_embed)
+    except Exception as e:
+        await config_channel.send("Adam. Ya done fucked up.\n"
+                                  f"{e}\n"
+                                  f"{e.args}\n"
+                                  f"{type(e)}")
 
 
 async def cactpot():
@@ -73,7 +107,7 @@ async def cactpot():
             config = json.load(f)
         role = server.get_role(int(config['role_config']['cactpot']))
         channel = bot.get_channel(int(config['channel_config']['cactpot']))
-        if not role or not channel:
+        if channel:
             return
         embed = discord.Embed(title='**The JumboCactPot has been drawn!**', description="Don't forget to check your "
                                                                                         "tickets within the hour for the "
@@ -83,7 +117,7 @@ async def cactpot():
                                                                                         "activate it now.")
         embed.set_image(url="https://img.finalfantasyxiv.com/lds/blog_image/jp_blog/jp20170607_iw_04.png")
 
-        await channel.send({role.ment})
+        await channel.send(f'{role.ment}')
         await channel.send(embed=embed)
 
 
@@ -103,6 +137,7 @@ async def monthly():
             await Mod.award_monthly_roles(Mod(bot), guild)
             await config_channel.send(embed=discord.Embed(title=f'{config_channel.guild.name} Monthly Reset!'))
 
+
 @bot.event
 async def on_error(event, *args, **kwargs):
     config_channel = None
@@ -120,6 +155,7 @@ async def on_error(event, *args, **kwargs):
     new_embed.add_field(name="Event", value=f"{args}")
     if kwargs:
         new_embed.add_field(name="Arguments", value=f"{kwargs}")
+    await config_channel.send(embed=new_embed)
 
 
 @bot.event
@@ -141,6 +177,7 @@ async def on_command_error(event, *args, **kwargs):
         new_embed.add_field(name="Arguments", value=f"{kwargs}")
     await config_channel.send(embed=new_embed)
 
+
 @bot.event
 async def on_ready():
     print(f'\nLogged in as: {bot.user.name} - {bot.user.id}\nVersion: {discord.__version__}')
@@ -148,6 +185,12 @@ async def on_ready():
     for guild in bot.guilds:
         if not os.path.isdir(f'config/{guild.id}/'):
             os.makedirs(f'config/{guild.id}/')
+
+
+@bot.command()
+async def get_jobs(ctx):
+    schedule.print_jobs()
+    await ctx.send(schedule.print_jobs())
 
 
 async def on_disconnect():
@@ -160,6 +203,5 @@ token = open('token.txt', 'r').readline()
 schedule.add_job(daily, 'cron', day='*', hour=18)
 schedule.add_job(weekly, 'cron', week='*', day_of_week='sat', hour=22)
 schedule.add_job(monthly, 'cron', month='*', day='1')
-schedule.add_job(cactpot, 'cron', week='*', day_of_week='sat', hour=20)
 schedule.start()
 bot.run(token, bot=True, reconnect=True)

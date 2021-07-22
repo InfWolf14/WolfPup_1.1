@@ -1,10 +1,11 @@
 {
   "prefix": "*",
   "channel_config": {
-    "config_channel": 742534075583037540,
+    "config_channel": 742389034420142090,
     "modlog_channel": 824405415793918033,
     "rolepost_channel": 824405415793918033,
     "welcome_channel": 742389034420142090,
+    "lounge": 742389034420142090,
     "bot_channels": [
       742534075583037540
     ],
@@ -15,13 +16,13 @@
   },
   "role_config": {
     "top_5": 795339533448380436,
-    "level_1": 794214130164039680,
+    "posse": 794214130164039680,
     "level_2": 794214139831910410,
     "level_3": 794214589839573032,
     "level_4": 794214592669810739,
     "level_5": 820131736452202507,
     "most_wanted": 795376533748449300,
-    "most_hel`pful": 795376546533081089,
+    "most_helpful": 795376546533081089,
     "most_thankful": 795376544959954954,
     "triumphant": 797850597432098836,
     "birthday": 797925283697131530,
@@ -36,5 +37,9 @@
     "star_react": "\ud83d\udd25",
     "starred_react": "\ud83d\udc4e",
     "threshold": 1
+  },
+  "lfg_config": {
+    "dtg_lfg": 836055327790596186,
+    "xiv_lfg": 858538861410648085
   }
 }

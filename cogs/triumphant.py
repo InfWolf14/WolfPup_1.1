@@ -194,7 +194,7 @@ class Triumphant(commands.Cog, name='Triumphant'):
 
     @commands.command(hidden=True)
     @has_permissions(manage_messages=True)
-    async def triumph_list(self, ctx, copy:str=None):
+    async def triumph_list(self, ctx, copy: str = None):
         id_list = ''
         user_list = ''
 
@@ -246,54 +246,32 @@ class Triumphant(commands.Cog, name='Triumphant'):
     @commands.command()
     @commands.is_owner()
     async def manual_reset(self, ctx):
-        if os.path.isfile(f'config/{ctx.server.id}/triumphant_copy.json'):
-            return
-        elif not os.path.isfile(f'config/{ctx.server.id}/triumphant_copy.json') and os.path.isfile(f'config/{ctx.server.id}/triumphant_copy.json'):
-            with open(f'config/{ctx.server.id}/triumphant.json', 'r') as f:
-                users = json.load(f)
-            with open(f'config/{ctx.server.id}/triumphant_copy.json', 'w') as f:
-                json.dump(users, f)
+        async with ctx.channel.typing():
 
-            os.remove(f'config/{ctx.server.id}/triumphant.json')
+            if os.path.isfile(f'config/{ctx.guild.id}/triumphant_copy.json'):
+                return
+            elif not os.path.isfile(f'config/{ctx.guild.id}/triumphant_copy.json') and os.path.isfile(
+                    f'config/{ctx.guild.id}/triumphant.json'):
+                with open(f'config/{ctx.guild.id}/triumphant.json', 'r') as f:
+                    users = json.load(f)
+                    print(users)
+                with open(f'config/{ctx.guild.id}/triumphant_copy.json', 'w') as f:
+                    json.dump(users, f)
 
-            triumphant = {}
+                os.remove(f'config/{ctx.guild.id}/triumphant.json')
 
-            with open(f'assets/json/server/{str(ctx.server.id)}/triumphant.json', 'w') as f:
-                json.dump(triumphant, f)
+                triumphant = {}
 
-            reset_embed = discord.Embed(title="\U0001f5d3| New Week Starts Here. Get that bread!")
-            with open(f'config/{ctx.server.id}/config.json', 'r') as f:
-                config = json.load(f)
-            chan = self.bot.get_channel(int(config['triumphant_config']["triumph_channel"]))
+                with open(f'config/{str(ctx.guild.id)}/triumphant.json', 'w') as f:
+                    json.dump(triumphant, f)
 
-            await chan.send(embed=reset_embed)
+                reset_embed = discord.Embed(title="\U0001f5d3| New Week Starts Here. Get that bread!")
+                with open(f'config/{ctx.guild.id}/config.json', 'r') as f:
+                    config = json.load(f)
+                chan = self.bot.get_channel(int(config['triumphant_config']["triumph_channel"]))
 
-    @staticmethod
-    async def triumphant_reset(self, server):
-        if server.id == 811378282113138719:
-            return
-        with open(f'config/{server.id}/config.json', 'r') as f:
-            config = json.load(f)
-        chan = self.bot.get_channel(int(config['triumphant_config']["triumph_channel"]))
+                await chan.send(embed=reset_embed)
 
-        if os.path.isfile(f'config/{server.id}/triumphant_copy.json'):
-            os.remove(f'config/{server.id}/triumphant_copy.json')
-        with open(f'config/{server.id}/triumphant_copy.json', 'r') as f:
-            users = json.load(f)
-
-        with open(f'config/{server.id}/triumphant_copy.json', 'w') as f:
-            json.dump(users, f)
-
-        os.remove(f'config/{server.id}/triumphant.json')
-
-        triumphant = {}
-
-        with open(f'assets/json/server/{str(server.id)}/triumphant.json', 'w') as f:
-            json.dump(triumphant, f)
-
-        reset_embed = discord.Embed(title="\U0001f5d3| New Week Starts Here. Get that bread!")
-
-        await chan.send(embed=reset_embed)
 
 
 def setup(bot):

@@ -120,7 +120,10 @@ class Level(commands.Cog, name='Level'):
 
     @staticmethod
     def update_level(xp):
-        return floor(((sqrt(40 + xp)) / 110) + 1)
+        level = floor(((sqrt(40 + xp)) / 110) + 1)
+        if level > 5:
+            level = 5
+        return level
 
     async def update_experience(self, guild_id, user_id, amount: int = None):
         if os.path.isfile(f'config/{guild_id}/config.json'):
@@ -137,13 +140,14 @@ class Level(commands.Cog, name='Level'):
                                                   return_document=ReturnDocument.AFTER)
         try:
             if guild.get_role(config['role_config'][f'level_{user["level"]}']) not in member.roles:
+                await member.add_roles(guild.get_role(config['role_config'][f'level_{user["level"]}']))
 
                 for x in range(1,4):
                     if guild.get_role(config['role_config'][f'level_{x+1}']) in member.roles:
                         await member.remove_roles(guild.get_role(config['role_config'][f'level_{x+1}']))
         except KeyError:
             pass
-            if user["level"] > 1:
+            if 1 < user["level"] <= 5:
                 await member.add_roles(guild.get_role(config['role_config'][f'level_{user["level"]}']))
         await self.generate_top_5(guild.id)
         return user['level'], user['exp']
@@ -183,12 +187,8 @@ class Level(commands.Cog, name='Level'):
 
     @commands.Cog.listener()
     async def on_member_remove(self, member):
-        with open(f'config/{str(member.guild.id)}/config.json', 'r') as f:
-            config = json.load(f)
-        config_channel = self.bot.get_channel(int(config['channel_config']['config_channel']))
         self.server_db = self.db[str(member.guild.id)]['users']
         self.server_db.find_one_and_delete({'_id': str(member.id)})
-        await config_channel.send(f"{member.name}'s data was deleted")
 
     @commands.command(hidden=True)
     @commands.is_owner()
@@ -314,6 +314,15 @@ class Level(commands.Cog, name='Level'):
                     await self.update_experience(message.guild.id, message.author.id)
             except KeyError:
                 pass
+
+    @commands.command()
+    @commands.is_owner()
+    async def manual_daily_reset(self, ctx):
+        self.server_db = self.db[str(ctx.guild.id)]['users']
+        reset_flags = {'flags': {'daily': True, 'daily_stamp': None, 'thank': True}}
+        for member in ctx.guild.members:
+            if not member.bot:
+                self.server_db.find_one_and_update({"_id": str(member.id)}, {'$set': reset_flags})
 
 
 def setup(bot):

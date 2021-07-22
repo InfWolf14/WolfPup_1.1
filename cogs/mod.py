@@ -164,6 +164,8 @@ class Mod(commands.Cog):
             most_thankful = self.server_db.find().sort('thanks.thanks_given', -1)
             new_embed = discord.Embed(title=f'This Month\'s Ultimate Outlaws!',
                                       description=f'Give it up for this month\'s winners!')
+            await channel.send("Starting Monthly Reset")
+
             for user in most_wanted:
                 user_id = self.bot.get_user(int(user["_id"]))
                 if user_id not in winners:
@@ -198,6 +200,7 @@ class Mod(commands.Cog):
             most_thankful = self.server_db.find().sort('thanks.thanks_given', -1)
             new_embed = discord.Embed(title=f'This Month\'s Ultimate Outlaws!',
                                       description=f'Give it up for this month\'s winners!')
+            await channel.send("Starting Monthly Reset")
             for user in most_wanted:
                 user_id = self.bot.get_user(int(user["_id"]))
                 if user_id not in winners:

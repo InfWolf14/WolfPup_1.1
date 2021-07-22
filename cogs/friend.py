@@ -8,7 +8,7 @@ class Friend(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(name='nomean',aliases = ['yesmean'], description="For a friend who's being mean to themself!")
+    @commands.command(name='nomean', aliases=['yesmean'], description="For a friend who's being mean to themself!")
     async def nomean(self, ctx):
         """This command is for a friend who is being mean to themselves.
         Show them who's boss and cheer them up!"""
@@ -19,7 +19,7 @@ class Friend(commands.Cog):
             url='https://cdn.discordapp.com/attachments/532380077896237061/791855065111592970/20200928_123113.jpg')
         await ctx.channel.send(embed=embed)
 
-    @commands.command(name='nosuck', description= "For friend's who think they suck.")
+    @commands.command(name='nosuck', description="For friend's who think they suck.")
     async def nosuck(self, ctx):
         """This command will make your friend think twice about saying that they suck! (In a good way!"""
         embed = discord.Embed(color=0x00ff00)
@@ -29,7 +29,8 @@ class Friend(commands.Cog):
             url='https://cdn.discordapp.com/attachments/532380077896237061/791855064804753418/fql8g0wcp1o51.jpg')
         await ctx.channel.send(embed=embed)
 
-    @commands.command(aliases = ['hornyjail','nohorny','horny','yeshorny'], description="For someone who's getting a little lewd.")
+    @commands.command(aliases=['hornyjail', 'nohorny', 'horny', 'yeshorny'],
+                      description="For someone who's getting a little lewd.")
     async def horny_jail(self, ctx):
         """This command is meant for that certain friend who's started themselves down the path of sin. UwU"""
         images = ["https://media.tenor.com/images/f781d9b1bbc4839dff9ad763c28deb46/tenor.gif",
@@ -58,7 +59,7 @@ class Friend(commands.Cog):
         embed = discord.Embed(color=0x00ff00)
         if member is not None:
             if member.nick:
-                name = " " +  member.nick
+                name = " " + member.nick
 
             else:
                 name = " " + member.display_name
@@ -89,9 +90,10 @@ class Friend(commands.Cog):
         embed.set_image(url=url)
         await ctx.channel.send(embed=embed)
 
-    @commands.command(name= "sherpa", aliases= ['Sherpa'])
+    @commands.command(name="sherpa", aliases=['Sherpa'])
     async def sherpa(self, ctx):
-        await ctx.send('https://docs.google.com/document/d/1NSvJ5KsutXBTnjXfL2BgTi-Z7p4EdqXfruAQEtb32VU/edit?usp=sharing')
+        await ctx.send(
+            'https://docs.google.com/document/d/1NSvJ5KsutXBTnjXfL2BgTi-Z7p4EdqXfruAQEtb32VU/edit?usp=sharing')
 
 
 def setup(bot):
